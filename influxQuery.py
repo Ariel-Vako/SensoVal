@@ -19,6 +19,5 @@ consulta = "SELECT * FROM /.*/ LIMIT 1"
 query_field_names = client.query(consulta)
 field_names = list(pd.DataFrame(query_field_names.get_points()).columns.values)
 
-
 result = client.query("SELECT angulo_sensor as Angulo, id_sensor, status_relay FROM angulos_svia WHERE id_sensor = '6' LIMIT 100")
 df = pd.DataFrame(list(result.get_points()))
