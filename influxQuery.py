@@ -26,7 +26,7 @@ client = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='
 # query_field_names = client.query(consulta)
 # field_names = list(pd.DataFrame(query_field_names.get_points()).columns.values)
 
-result = client.query("SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' and angulo_sensor< -40  LIMIT 10000")
+result = client.query("SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' and angulo_sensor< -40  AND time < '2019-04-30'")
 df = pd.DataFrame(list(result.get_points()))
 
 for index, fecha in df['Fecha'].items():
@@ -44,11 +44,10 @@ ax.set(xlabel="Fecha",
        title="Válvula Abierta")
 
 # Malla
-plt.grid(color='r', linestyle='-', linewidth=1)
+plt.grid(color='lightgray', linestyle='-', linewidth=0.3)
 
 # rotate tick labels
 plt.setp(ax.get_xticklabels(), rotation=45)
 
 # plot
 ax.scatter(df['Fecha'], df['Angulo'], color='red', alpha=0.3)
-
