@@ -29,7 +29,7 @@ client = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='
 result = client.query("SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' and angulo_sensor< -40  AND time < '2019-04-30'")
 df = pd.DataFrame(list(result.get_points()))
 
-for index, fecha in df['Fecha'].items():
+for index, fecha in df['Fecha'].items():  # TODO: Se debe paralelizar para disminuir el tiempo de procesamiento.
     df['Fecha'].iloc[index] = parse(fecha)
 
 # df.plot(kind='scatter', x='time', y='angulo_sensor', color='red')
