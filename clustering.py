@@ -29,9 +29,9 @@ def n_monthly(data):
     data_fechas = data
     res = []
     inicio = 0
-    for mes in range(7, 13, 1):
+    for mes in range(6, 13, 1):
         data_mes_nreal = []
-        for index, fecha in enumerate(data_fechas[inicio, -1]):
+        for index, fecha in enumerate(data_fechas[inicio: -1]):
             if fecha.month == mes:
                 fecha_nreal = from_time_to_natural(fecha)
                 data_mes_nreal.append(fecha_nreal)
