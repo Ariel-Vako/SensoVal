@@ -67,5 +67,8 @@ with open(fecha_file, 'rb') as rf2:
 # # rotate tick labels
 # plt.setp(ax.get_xticklabels(), rotation=45)
 
-# Cálculo de número de cluster
-score = clu.find_n_clusters(fecha)
+# Cálculo de número de cluster por mes
+score = clu.n_monthly(fecha)
+
+# Gráfica de codo mensual para escoger n
+clu.plotea(score)
