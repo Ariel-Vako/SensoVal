@@ -1,6 +1,5 @@
 from influxdb import InfluxDBClient
 import pandas as pd
-import matplotlib.pyplot as plt
 import pickle
 import os.path
 import maya
@@ -70,5 +69,8 @@ with open(fecha_file, 'rb') as rf2:
 # Cálculo de número de cluster por mes
 score = clu.n_monthly(fecha)
 
-# Gráfica de codo mensual para escoger n
-clu.plotea(score)
+# Guardar la inercia de los cluster.-
+# inercia = ruta + '/inercia.txt'
+# with open(inercia, 'wb') as fl:
+#     pickle.dump(score, fl)
+

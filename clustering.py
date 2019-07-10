@@ -1,18 +1,20 @@
 from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
+import numpy as np
 
 
 def find_clusters(data, no_cluster=7):
-    kmeans = KMeans(n_clusters=no_cluster, random_state=0).fit(data)
+    kmeans = KMeans(n_clusters=no_cluster, random_state=0).fit(np.array(data).reshape(-1, 1))
     return kmeans
 
 
 def find_n_clusters(data):
-    resultado = []
-    for i in range(2, len(data) - 1, 1):
+    sse = []
+    top = min(50, len(data))
+    for i in range(2, top, 1):
         kmeans = find_clusters(data, i)
-        resultado.append(kmeans.score())
-    return resultado
+        sse.append(kmeans.inertia_)
+    print(sse)
+    return sse
 
 
 def from_time_to_natural(fecha):
@@ -29,6 +31,7 @@ def n_monthly(data):
     data_fechas = data
     res = []
     inicio = 0
+    # 2018
     for mes in range(6, 13, 1):
         data_mes_nreal = []
         for index, fecha in enumerate(data_fechas[inicio: -1]):
@@ -36,16 +39,19 @@ def n_monthly(data):
                 fecha_nreal = from_time_to_natural(fecha)
                 data_mes_nreal.append(fecha_nreal)
             else:
-                inicio = index + 1
+                inicio += index
                 break
         res.append(find_n_clusters(data_mes_nreal))
+    # 20019
+    if data_fechas[inicio].year == 2019:
+        for mes in range(1, 5, 1):
+            data_mes_nreal = []
+            for index, fecha in enumerate(data_fechas[inicio: -1]):
+                if fecha.month == mes:
+                    fecha_nreal = from_time_to_natural(fecha)
+                    data_mes_nreal.append(fecha_nreal)
+                else:
+                    inicio += index
+                    break
+            res.append(find_n_clusters(data_mes_nreal))
     return res
-
-
-def plotea(score):
-    for i, valor in enumerate(score):
-        plt.subplot(240 + i)
-        plt.plot(valor, color="b", alpha=0.5)
-        plt.title(f'Mes {i + 6}')
-    plt.show()
-    return
