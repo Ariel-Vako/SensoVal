@@ -1,5 +1,6 @@
 from sklearn.cluster import KMeans
 import numpy as np
+from collections import Counter, defaultdict
 
 
 def find_clusters(data, no_cluster=7):
@@ -54,4 +55,49 @@ def n_monthly(data):
                     inicio += index
                     break
             res.append(find_n_clusters(data_mes_nreal))
+    return res
+
+
+def cluster(data, n):
+    kmeans = find_clusters(data, n)
+    return kmeans
+
+
+def if_cluster_peke(grupo):
+    grupo_indices = []
+    if Counter(grupo.labels_) <= 3:
+        for index, etiqueta in enumerate(grupo.labels_):
+            grupo_indices.append(index)
+    return grupo_indices
+
+
+def cluster_monthly(data, n):
+    data_fechas = data
+    res = []
+    inicio = 0
+    # 2018
+    for mes in range(7, 13, 1):
+        data_mes_nreal = []
+        for index, fecha in enumerate(data_fechas[inicio: -1]):
+            if fecha.month == mes:
+                fecha_nreal = from_time_to_natural(fecha)
+                data_mes_nreal.append(fecha_nreal)
+            else:
+                inicio += index
+                break
+        grupo = cluster(data_mes_nreal, n)
+        res.append(if_cluster_peke(grupo))
+    # 20019
+    if data_fechas[inicio].year == 2019:
+        for mes in range(1, 5, 1):
+            data_mes_nreal = []
+            for index, fecha in enumerate(data_fechas[inicio: -1]):
+                if fecha.month == mes:
+                    fecha_nreal = from_time_to_natural(fecha)
+                    data_mes_nreal.append(fecha_nreal)
+                else:
+                    inicio += index
+                    break
+            grupo = cluster(data_mes_nreal, n)
+            res.append(if_cluster_peke(grupo))
     return res
