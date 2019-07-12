@@ -15,19 +15,19 @@ with open(fecha_file, 'rb') as rf2:
     fecha = pickle.load(rf2)
 
 # Número de cluster por mes.
-dicc_n_cluster = {'201806': 0,
-                  '201807': 10,
-                  '201808': 20,
-                  '201809': 15,
+dicc_n_cluster = {'20186': 0,
+                  '20187': 10,
+                  '20188': 20,
+                  '20189': 15,
                   '201810': 20,
                   '201811': 15,
                   '201812': 20,
-                  '201901': 15,
-                  '201902': 15,
-                  '201903': 15,
-                  '201904': 15}
+                  '20191': 15,
+                  '20192': 15,
+                  '20193': 15,
+                  '20194': 15}
 
 
 # Transformar a
-dates = clu.from_time_to_natural(fecha)
+dates = clu.cluster_monthly(fecha, dicc_n_cluster)
 
