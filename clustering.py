@@ -67,17 +67,20 @@ def cluster(data, n):
 
 
 def if_cluster(grupo):
-    grupo_indices = []
+    dicc_indices = {}
     if grupo:
-        if Counter(grupo.labels_) > 3:
-            for index, etiqueta in enumerate(grupo.labels_):
-                grupo_indices.append(index)
-    return grupo_indices
+        n = max(grupo.labels_)
+        for etiq in range(n + 1):
+            if Counter(grupo.labels_ == etiq)[1] > 3:
+                vector_valor = np.where(grupo.labels_ == etiq)[0]
+                dicc_indices[str(etiq)] = vector_valor
+
+    return dicc_indices
 
 
 def cluster_monthly(data, dicc):
     data_fechas = data
-    res = []
+    diccionario_cluster = {}
     inicio = 0
     # 2018
     for mes in range(6, 13, 1):
@@ -88,11 +91,11 @@ def cluster_monthly(data, dicc):
                 data_mes_nreal.append(fecha_nreal)
             else:
                 inicio += index
-                n = dicc[f'{fecha.year}' + f'{mes}']
+                n = dicc[f'{data_fechas[inicio - 1].year}' + f'{mes}']
                 break
 
         grupo = cluster(data_mes_nreal, n)
-        res.append(if_cluster(grupo))
+        diccionario_cluster[f'{data_fechas[inicio - 1].year}' + f'{mes}'] = if_cluster(grupo)
     # 20019
     if data_fechas[inicio].year == 2019:
         for mes in range(1, 5, 1):
@@ -103,9 +106,10 @@ def cluster_monthly(data, dicc):
                     data_mes_nreal.append(fecha_nreal)
                 else:
                     inicio += index
-                    n = dicc[f'{fecha.year}' + f'{fecha.month}']
+                    n = dicc[f'{data_fechas[inicio - 1].year}' + f'{fecha.month}']
                     break
 
             grupo = cluster(data_mes_nreal, n)
-            res.append(if_cluster(grupo))
-    return res
+            diccionario_cluster[f'{data_fechas[inicio - 1].year}' + f'{mes}'] = if_cluster(grupo)
+    return diccionario_cluster
+

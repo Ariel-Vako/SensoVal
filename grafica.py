@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import pickle
+import matplotlib.dates as mdates
+from matplotlib.ticker import MultipleLocator
 
 
 # Gráfica de codo mensual para escoger n
@@ -18,11 +20,34 @@ def plot_elbow(score):
     return
 
 
-ruta = '/media/arielmardones/HS/SensoVal/'
-inercia = ruta + '/inercia.txt'
-with open(inercia, 'rb') as fl:
-    score = pickle.load(fl)
+def gráfica_transición(angulos, fechas):
+    dia = mdates.DayLocator(interval=2)
+    dia_formato = mdates.DateFormatter('%d-%H:%M:%S')
 
-plot_elbow(score)
+    fig, ax = plt.subplots(figsize=(12, 8))
+    ax.xaxis.set_major_locator(dia)
+    ax.xaxis.set_major_formatter(dia_formato)
+    ax.set_xlim([fechas[0], fechas[-1]])  # - timedelta(days=1)
+
+    ax.grid(b=True, which='major', color='#666666')
+    ax.grid(b=True, which='minor', color='#999999', alpha=0.4, linestyle='--')
+    ax.xaxis.set_minor_locator(MultipleLocator(1))
+    ax.minorticks_on()
+    plt.xticks(rotation=45)
+
+    ax.set_ylabel('Angle (°)', fontsize=16)
+    ax.set_title(f'Transición', fontsize=18)
+
+    scatter = ax.scatter(fechas, angulos, alpha=0.3)
+
+    ax.show()
+    return
 
 
+if __name__ == '__main__':
+    ruta = '/media/arielmardones/HS/SensoVal/'
+    inercia = ruta + '/inercia.txt'
+    with open(inercia, 'rb') as fl:
+        score = pickle.load(fl)
+
+    plot_elbow(score)

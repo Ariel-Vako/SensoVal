@@ -29,12 +29,12 @@ pd.set_option('display.max_columns', 1000)
 
 # first time
 ruta = '/media/arielmardones/HS/SensoVal/'
-query_bckup = ruta + 'query_inlfux_sensoVal.txt'
+query_bckup = ruta + 'query_influx_sensoVal.txt'
 fecha_file = ruta + 'fechas.txt'
 if not os.path.isfile(query_bckup):
     client = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
 
-    result = client.query("SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' and angulo_sensor< -40  AND time < '2019-04-30'")
+    result = client.query("SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' and angulo_sensor<= -40  AND time < '2019-04-30'")
     df = pd.DataFrame(list(result.get_points()))
     fecha = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
 
