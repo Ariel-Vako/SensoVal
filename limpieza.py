@@ -2,6 +2,8 @@ import pickle
 import clustering as clu
 import numpy as np
 import grafica as grf
+import influxQuery as inq
+import os.path
 
 ruta = '/media/arielmardones/HS/SensoVal/'
 query_bckup = ruta + 'query_influx_sensoVal.txt'
@@ -17,19 +19,28 @@ with open(fecha_file, 'rb') as rf2:
 
 # Número de cluster por mes.
 dicc_n_cluster = {'20186': 0,
-                  '20187': 10,
-                  '20188': 20,
-                  '20189': 15,
-                  '201810': 20,
-                  '201811': 15,
-                  '201812': 20,
-                  '20191': 15,
-                  '20192': 15,
-                  '20193': 15,
-                  '20194': 15}
+                  '20187': 5,
+                  '20188': 10,
+                  '20189': 10,
+                  '201810': 10,
+                  '201811': 10,
+                  '201812': 10,
+                  '20191': 5,
+                  '20192': 10,
+                  '20193': 10,
+                  '20194': 10}
 
 # Transformar indices en fechas
-indices_en_cierre = clu.cluster_monthly(fecha, dicc_n_cluster)
+
+
+indicesv6 = ruta + 'indices_cierre'
+if not os.path.isfile(indicesv6):
+    indices_en_cierre = clu.cluster_monthly(fecha, dicc_n_cluster)
+    with open(indicesv6, 'wb') as f:
+        pickle.dump(indices_en_cierre, f)
+
+with open(indicesv6, 'rb') as f2:
+    indices_en_cierre = pickle.load(f2)
 
 for año_mes in indices_en_cierre.values():
     for cluster in año_mes.values():
@@ -45,9 +56,8 @@ for año_mes in indices_en_cierre.values():
         """
 
         # Cierres
-        angulo_cierre = np.array(df['Angulo'][index_fin_cierre[0] - 12:index_fin_cierre[-1]])
-        fecha_cierre = fecha[index_fin_cierre[0] - 12:index_fin_cierre[-1]]
-        grf.gráfica_transición(angulo_cierre, fecha_cierre)
+        df_cierre, fechas_cierre = inq.query_generator_cierre(fecha[index_fin_cierre[-1]])
+        grf.gráfica_transición(fechas_cierre, df)
 
         # Aperturas
         angulo_apertura = np.array(df['Angulo'][index_inicio_apertura[0]:index_inicio_apertura[-1] + 12])

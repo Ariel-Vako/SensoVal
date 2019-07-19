@@ -1,6 +1,7 @@
 from sklearn.cluster import KMeans
 import numpy as np
 from collections import Counter, defaultdict
+import pandas as pd
 
 
 def find_clusters(data, no_cluster=7):
@@ -10,7 +11,7 @@ def find_clusters(data, no_cluster=7):
 
 def find_n_clusters(data):
     sse = []
-    top = min(50, len(data))
+    top = min(15, len(data))
     for i in range(2, top, 1):
         kmeans = find_clusters(data, i)
         sse.append(kmeans.inertia_)

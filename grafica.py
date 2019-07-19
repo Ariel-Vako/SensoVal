@@ -14,7 +14,7 @@ def plot_elbow(score):
         plt.grid(b=True, which='major', color='#666666')
         plt.grid(b=True, which='minor', color='#999999', alpha=0.2, linestyle='--')
         plt.minorticks_on()
-        xmax = min(len(score[i]) - 1, 20)
+        xmax = min(len(score[i]) - 1, 15)
         plt.xlim([0, xmax])
     plt.show()
     return
