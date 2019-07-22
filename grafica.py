@@ -20,8 +20,8 @@ def plot_elbow(score):
     return
 
 
-def gráfica_transición(angulos, fechas):
-    dia = mdates.DayLocator(interval=2)
+def gráfica_transición(fechas, angulos):
+    dia = mdates.SecondLocator(interval=2)
     dia_formato = mdates.DateFormatter('%d-%H:%M:%S')
 
     fig, ax = plt.subplots(figsize=(12, 8))
@@ -35,12 +35,13 @@ def gráfica_transición(angulos, fechas):
     ax.minorticks_on()
     plt.xticks(rotation=45)
 
-    ax.set_ylabel('Angle (°)', fontsize=16)
-    ax.set_title(f'Transición', fontsize=18)
+    ax.set_xlabel('Tiempo (s)', fontsize=16)
+    ax.set_ylabel('Ángulo (°)', fontsize=16)
+    ax.set_title('Transición', fontsize=18)
 
-    scatter = ax.scatter(fechas, angulos, alpha=0.3)
+    ax.scatter(fechas, angulos, alpha=0.3)
 
-    ax.show()
+    plt.show()
     return
 
 

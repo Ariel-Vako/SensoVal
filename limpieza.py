@@ -57,9 +57,8 @@ for año_mes in indices_en_cierre.values():
 
         # Cierres
         df_cierre, fechas_cierre = inq.query_generator_cierre(fecha[index_fin_cierre[-1]])
-        grf.gráfica_transición(fechas_cierre, df)
+        grf.gráfica_transición(fechas_cierre, list(df_cierre))
 
         # Aperturas
-        angulo_apertura = np.array(df['Angulo'][index_inicio_apertura[0]:index_inicio_apertura[-1] + 12])
-        fecha_apertura = fecha[index_inicio_apertura[0]:index_inicio_apertura[-1] + 12]
-        grf.gráfica_transición(angulo_apertura, fecha_apertura)
+        angulo_apertura, fecha_apertura=inq.query_generator_apertura(fecha[index_inicio_apertura[0]])
+        grf.gráfica_transición(fecha_apertura, list(angulo_apertura))

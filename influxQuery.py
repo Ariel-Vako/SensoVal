@@ -8,10 +8,10 @@ import datetime as dt
 
 
 def query_generator_cierre(fecha_fin):
-    fecha_inicio = fecha_fin - dt.timedelta(seconds=14)
+    fecha_inicio = fecha_fin - dt.timedelta(seconds=20)
     cliente = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
 
-    consulta = f"SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND angulo_sensor<= -40  AND time  >= {fecha_inicio} AND time<= {fecha_fin}"
+    consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
     resultado = cliente.query(consulta)
     df = pd.DataFrame(list(resultado.get_points()))
     fechas_cierre = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
@@ -19,10 +19,10 @@ def query_generator_cierre(fecha_fin):
 
 
 def query_generator_apertura(fecha_inicio):
-    fecha_fin = fecha_inicio + dt.timedelta(seconds=14)
+    fecha_fin = fecha_inicio + dt.timedelta(seconds=20)
     cliente = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
 
-    consulta = f"SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND angulo_sensor<= -40  AND time  >= {fecha_inicio} AND time<= {fecha_fin}"
+    consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
     resultado = cliente.query(consulta)
     df = pd.DataFrame(list(resultado.get_points()))
     fechas_apertura = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
