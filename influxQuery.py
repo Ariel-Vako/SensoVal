@@ -8,13 +8,24 @@ import datetime as dt
 
 
 def query_generator_cierre(fecha_fin):
-    fecha_inicio = fecha_fin - dt.timedelta(seconds=20)
     cliente = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
-
+    fecha_inicio = fecha_fin - dt.timedelta(seconds=20)
     consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
     resultado = cliente.query(consulta)
     df = pd.DataFrame(list(resultado.get_points()))
     fechas_cierre = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
+    if df['Angulo'][0] < 40:
+        delta = 1
+        while df['Angulo'][0] < 40 and delta < 25:
+            df = df.iloc[0:0]
+
+            fecha_inicio -= dt.timedelta(seconds=2)
+            print(fecha_inicio)
+            consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
+            resultado = cliente.query(consulta)
+            df = pd.DataFrame(list(resultado.get_points()))
+            fechas_cierre = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
+            delta += 1
     return df['Angulo'], fechas_cierre
 
 
@@ -26,6 +37,17 @@ def query_generator_apertura(fecha_inicio):
     resultado = cliente.query(consulta)
     df = pd.DataFrame(list(resultado.get_points()))
     fechas_apertura = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
+    last_angle = df['Angulo'].iloc[-1]
+    if last_angle < 40:
+        delta = 1
+        while last_angle < 40 and delta < 25:
+            fecha_fin += dt.timedelta(seconds=2)
+            print(fecha_fin)
+            consulta_interna = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
+            resultado_siguiente = cliente.query(consulta_interna)
+            df = pd.DataFrame(list(resultado_siguiente.get_points()))
+            fechas_apertura = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
+            delta += 1
     return df['Angulo'], fechas_apertura
 
 
