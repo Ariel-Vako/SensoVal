@@ -8,47 +8,66 @@ import datetime as dt
 
 
 def query_generator_cierre(fecha_fin):
+    fecha_inicio = fecha_fin - dt.timedelta(seconds=60)
+
     cliente = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
-    fecha_inicio = fecha_fin - dt.timedelta(seconds=20)
     consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
     resultado = cliente.query(consulta)
+
     df = pd.DataFrame(list(resultado.get_points()))
     fechas_cierre = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
-    if df['Angulo'][0] < 40:
-        delta = 1
-        while df['Angulo'][0] < 40 and delta < 25:
-            df = df.iloc[0:0]
-
-            fecha_inicio -= dt.timedelta(seconds=2)
-            print(fecha_inicio)
-            consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
-            resultado = cliente.query(consulta)
-            df = pd.DataFrame(list(resultado.get_points()))
-            fechas_cierre = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
-            delta += 1
     return df['Angulo'], fechas_cierre
 
 
 def query_generator_apertura(fecha_inicio):
-    fecha_fin = fecha_inicio + dt.timedelta(seconds=20)
-    cliente = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
+    fecha_fin = fecha_inicio + dt.timedelta(seconds=60)
 
+    cliente = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
     consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
     resultado = cliente.query(consulta)
+
     df = pd.DataFrame(list(resultado.get_points()))
     fechas_apertura = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
-    last_angle = df['Angulo'].iloc[-1]
-    if last_angle < 40:
-        delta = 1
-        while last_angle < 40 and delta < 25:
-            fecha_fin += dt.timedelta(seconds=2)
-            print(fecha_fin)
-            consulta_interna = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
-            resultado_siguiente = cliente.query(consulta_interna)
-            df = pd.DataFrame(list(resultado_siguiente.get_points()))
-            fechas_apertura = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
-            delta += 1
     return df['Angulo'], fechas_apertura
+
+
+def ventana(cadena_angulos, flag):
+    if flag == 0:  # cerrando
+        index_inicio = len(cadena_angulos)
+
+        i = 0
+        buscar_inicio = cadena_angulos[-1]
+        while buscar_inicio < 40 and i < len(cadena_angulos):
+            index_inicio -= 1
+            buscar_inicio = cadena_angulos[index_inicio]
+            i += 1
+
+        f = 0
+        index_final = 0
+        buscar_final = cadena_angulos[0]
+        while buscar_final > -40 and f < len(cadena_angulos):
+            index_final += 1
+            buscar_final = cadena_angulos[index_final]
+            f += 1
+
+    else:  # abriendo
+
+        i = 0
+        index_inicio = len(cadena_angulos)
+        buscar_inicio = cadena_angulos[-1]
+        while buscar_inicio > -40 and i < len(cadena_angulos):
+            index_inicio -= 1
+            buscar_inicio = cadena_angulos[index_inicio]
+            i += 1
+
+        f = 0
+        index_final = 0
+        buscar_final = cadena_angulos[0]
+        while buscar_final < 40 and f < len(cadena_angulos):
+            index_final += 1
+            buscar_final = cadena_angulos[index_final]
+            f += 1
+    return index_inicio, index_final
 
 
 if __name__ == '__main__':
