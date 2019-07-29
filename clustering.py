@@ -1,7 +1,7 @@
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 import numpy as np
-from collections import Counter, defaultdict
-import pandas as pd
+from collections import Counter
 
 
 def find_clusters(data, no_cluster=7):
@@ -11,12 +11,19 @@ def find_clusters(data, no_cluster=7):
 
 def find_n_clusters(data):
     sse = []
-    top = min(15, len(data))
+    scores = []
+    top = min(30, len(data))
+    score_data = np.asarray(data).reshape(-1, 1)
     for i in range(2, top, 1):
         kmeans = find_clusters(data, i)
-        sse.append(kmeans.inertia_) #TODO: EN VEZ DE GUARDAR LA INERCIA, SE DEBE UTILIZAR MÉTRICAS QUE MIDAN EL CLUSTERIZADO SIN GROUND TRUTH!!
-    print(sse)
-    return sse
+
+        ss = silhouette_score(score_data, kmeans.labels_, metric='euclidean')
+        ch = calinski_harabasz_score(score_data, kmeans.labels_)
+        db = davies_bouldin_score(score_data, kmeans.labels_)
+
+        scores.append([ss, ch, db])
+
+    return scores
 
 
 def from_time_to_natural(fecha):
@@ -113,4 +120,3 @@ def cluster_monthly(data, dicc):
             grupo = cluster(data_mes_nreal, n)
             diccionario_cluster[f'{data_fechas[inicio - 1].year}' + f'{mes}'] = if_cluster(grupo)
     return diccionario_cluster
-

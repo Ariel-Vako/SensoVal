@@ -5,6 +5,11 @@ import os.path
 import maya
 import clustering as clu
 import datetime as dt
+from concurrent.futures import ThreadPoolExecutor
+
+
+def mapeo_fechas(cadena):
+    return maya.MayaDT.from_rfc3339(cadena).datetime()
 
 
 def query_generator_cierre(fecha_fin):
@@ -13,10 +18,15 @@ def query_generator_cierre(fecha_fin):
     cliente = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
     consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
     resultado = cliente.query(consulta)
+    cliente.close()
 
     df = pd.DataFrame(list(resultado.get_points()))
     fechas_cierre = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
-    return df['Angulo'], fechas_cierre
+    ii, ifl = ventana(list(df['Angulo']), 0)
+    if ii == 0 and ifl == 0:
+        return [], []
+    else:
+        return df['Angulo'][ii - 1:ifl + 1], fechas_cierre[ii - 1: ifl + 1]
 
 
 def query_generator_apertura(fecha_inicio):
@@ -25,10 +35,15 @@ def query_generator_apertura(fecha_inicio):
     cliente = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
     consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
     resultado = cliente.query(consulta)
+    cliente.close()
 
     df = pd.DataFrame(list(resultado.get_points()))
     fechas_apertura = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
-    return df['Angulo'], fechas_apertura
+    ii, ifl = ventana(list(df['Angulo']), 0)
+    if ii == 0 and ifl == 0:
+        return [], []
+    else:
+        return df['Angulo'][ii:ifl + 1], fechas_apertura[ii: ifl + 1]
 
 
 def ventana(cadena_angulos, flag):
@@ -42,13 +57,11 @@ def ventana(cadena_angulos, flag):
             buscar_inicio = cadena_angulos[index_inicio]
             i += 1
 
-        f = 0
         index_final = 0
         buscar_final = cadena_angulos[0]
-        while buscar_final > -40 and f < len(cadena_angulos):
+        while buscar_final > -40 and index_final < len(cadena_angulos) - 1:
             index_final += 1
             buscar_final = cadena_angulos[index_final]
-            f += 1
 
     else:  # abriendo
 
@@ -60,13 +73,12 @@ def ventana(cadena_angulos, flag):
             buscar_inicio = cadena_angulos[index_inicio]
             i += 1
 
-        f = 0
         index_final = 0
         buscar_final = cadena_angulos[0]
-        while buscar_final < 40 and f < len(cadena_angulos):
+        while buscar_final < 40 and index_final < len(cadena_angulos) - 1:
             index_final += 1
             buscar_final = cadena_angulos[index_final]
-            f += 1
+
     return index_inicio, index_final
 
 
@@ -102,7 +114,9 @@ if __name__ == '__main__':
 
         result = client.query("SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' and angulo_sensor<= -40  AND time < '2019-04-30'")
         df = pd.DataFrame(list(result.get_points()))
-        fecha = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
+        # fecha = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
+        executor = ThreadPoolExecutor(max_workers=4)
+        fecha = list(executor.map(mapeo_fechas, df['Fecha']))
 
         with open(query_bckup, 'wb') as fl:
             pickle.dump(df, fl)

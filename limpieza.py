@@ -1,6 +1,5 @@
 import pickle
 import clustering as clu
-import numpy as np
 import grafica as grf
 import influxQuery as inq
 import os.path
@@ -19,21 +18,21 @@ with open(fecha_file, 'rb') as rf2:
 
 # Número de cluster por mes.
 dicc_n_cluster = {'20186': 0,
-                  '20187': 5,
-                  '20188': 10,
-                  '20189': 10,
-                  '201810': 10,
-                  '201811': 10,
-                  '201812': 10,
-                  '20191': 5,
-                  '20192': 10,
-                  '20193': 10,
-                  '20194': 10}
+                  '20187': 10,
+                  '20188': 15,
+                  '20189': 15,
+                  '201810': 15,
+                  '201811': 15,
+                  '201812': 15,
+                  '20191': 10,
+                  '20192': 15,
+                  '20193': 15,
+                  '20194': 15}
 
 # Transformar indices en fechas
 
 
-indicesv6 = ruta + 'indices_cierre'
+indicesv6 = ruta + 'indices_cierre.txt'
 if not os.path.isfile(indicesv6):
     indices_en_cierre = clu.cluster_monthly(fecha, dicc_n_cluster)
     with open(indicesv6, 'wb') as f:
@@ -60,5 +59,5 @@ for año_mes in indices_en_cierre.values():
         grf.gráfica_transición(fechas_cierre, list(df_cierre))
 
         # Aperturas
-        angulo_apertura, fecha_apertura=inq.query_generator_apertura(fecha[index_inicio_apertura[0]])
+        angulo_apertura, fecha_apertura = inq.query_generator_apertura(fecha[index_inicio_apertura[0]])
         grf.gráfica_transición(fecha_apertura, list(angulo_apertura))
