@@ -1,28 +1,33 @@
-from sklearn.cluster import KMeans
+from sklearn.cluster import MiniBatchKMeans
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 import numpy as np
 from collections import Counter
+# from concurrent.futures import ThreadPoolExecutor
 
+def find_clusters(data, no_cluster=10):
+    score_data = np.asarray(data).reshape(-1, 1)
 
-def find_clusters(data, no_cluster=7):
-    kmeans = KMeans(n_clusters=no_cluster, random_state=0).fit(np.array(data).reshape(-1, 1))
-    return kmeans
+    # kmeans = KMeans(n_clusters=no_cluster, random_state=0).fit(np.array(data).reshape(-1, 1))
+    mn_kmeans = MiniBatchKMeans(n_clusters=no_cluster, random_state=0).fit(np.array(data).reshape(-1, 1))
+
+    ss = silhouette_score(score_data, mn_kmeans.labels_, metric='euclidean')
+    ch = calinski_harabasz_score(score_data, mn_kmeans.labels_)
+    db = davies_bouldin_score(score_data, mn_kmeans.labels_)
+    return mn_kmeans, np.array([ss, ch, db])
 
 
 def find_n_clusters(data):
-    sse = []
-    scores = []
-    top = min(30, len(data))
-    score_data = np.asarray(data).reshape(-1, 1)
+    scores = np.empty([1,3])
+    top = min(20, len(data))
+
+    # scores = list(map(find_clusters, data, *))
+    # e = ThreadPoolExecutor()
+    # futures = {}
     for i in range(2, top, 1):
-        kmeans = find_clusters(data, i)
+        score_cluster = find_clusters(data, i)
+        scores  = np.concatenate((scores, [score_cluster]))
 
-        ss = silhouette_score(score_data, kmeans.labels_, metric='euclidean')
-        ch = calinski_harabasz_score(score_data, kmeans.labels_)
-        db = davies_bouldin_score(score_data, kmeans.labels_)
-
-        scores.append([ss, ch, db])
-
+    np.delete(scores,0,0)
     return scores
 
 
@@ -68,7 +73,7 @@ def n_monthly(data):
 
 def cluster(data, n):
     if n != 0:
-        kmeans = find_clusters(data, n)
+        kmeans, score = find_clusters(data, n)
     else:
         kmeans = []
     return kmeans

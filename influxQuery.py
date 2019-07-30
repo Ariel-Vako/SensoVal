@@ -5,7 +5,7 @@ import os.path
 import maya
 import clustering as clu
 import datetime as dt
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 
 
 def mapeo_fechas(cadena):
@@ -21,7 +21,10 @@ def query_generator_cierre(fecha_fin):
     cliente.close()
 
     df = pd.DataFrame(list(resultado.get_points()))
-    fechas_cierre = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
+
+    e = ProcessPoolExecutor()
+    fechas_cierre = list(e.map(mapeo_fechas, df['Fecha']))
+
     ii, ifl = ventana(list(df['Angulo']), 0)
     if ii == 0 and ifl == 0:
         return [], []
@@ -38,8 +41,11 @@ def query_generator_apertura(fecha_inicio):
     cliente.close()
 
     df = pd.DataFrame(list(resultado.get_points()))
-    fechas_apertura = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
-    ii, ifl = ventana(list(df['Angulo']), 0)
+
+    e = ProcessPoolExecutor()
+    fechas_apertura = list(e.map(mapeo_fechas, df['Fecha']))
+
+    ii, ifl = ventana(list(df['Angulo']), 1)
     if ii == 0 and ifl == 0:
         return [], []
     else:
@@ -115,8 +121,9 @@ if __name__ == '__main__':
         result = client.query("SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' and angulo_sensor<= -40  AND time < '2019-04-30'")
         df = pd.DataFrame(list(result.get_points()))
         # fecha = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
-        executor = ThreadPoolExecutor(max_workers=4)
-        fecha = list(executor.map(mapeo_fechas, df['Fecha']))
+
+        e = ProcessPoolExecutor()
+        fecha = list(e.map(mapeo_fechas, df['Fecha']))
 
         with open(query_bckup, 'wb') as fl:
             pickle.dump(df, fl)
