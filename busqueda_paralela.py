@@ -1,12 +1,28 @@
 import pandas as pd
 import pickle
 import numpy as np
+from influxdb import InfluxDBClient
 from concurrent.futures import ProcessPoolExecutor
+import maya
 
 
-def encontrar_brechas(df, sector):
+def mapeo_fechas(cadena):
+    return maya.MayaDT.from_rfc3339(cadena).datetime()
 
-    return
+
+def query_zeros(fecha_inicio, fecha_fin):
+    cliente = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
+    consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE angulo_sensor<= 2 and angulo_sensor>= -2 and id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
+    resultado = cliente.query(consulta)
+    cliente.close()
+
+    df = pd.DataFrame(list(resultado.get_points()))
+
+    e = ProcessPoolExecutor()
+    fecha = list(e.map(mapeo_fechas, df['Fecha']))
+    df['fecha'] = fecha
+    df.pop('Fecha')
+    return df
 
 
 ruta = '/media/arielmardones/HS/SensoVal/'
@@ -35,5 +51,10 @@ segmentación['diferencia'] = segmentación['diferencia'] / np.timedelta64(1, 's
 
 # Sectores
 sectores_con_transiente = segmentación.loc[segmentación['diferencia'] > intervalo_tiempo + 15]
-df['fecha'].loc
+
+for row in range(len(sectores_con_transiente)):
+    angulos_ceros = query_zeros(sectores_con_transiente['fecha_inicio'].iloc[row], sectores_con_transiente['fecha_fin'].iloc[row])
+
+
+
 print('')
