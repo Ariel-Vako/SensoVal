@@ -124,6 +124,8 @@ if __name__ == '__main__':
 
         e = ProcessPoolExecutor()
         fecha = list(e.map(mapeo_fechas, df['Fecha']))
+        df['fecha'] = fecha
+        df.pop('Fecha')
 
         with open(query_bckup, 'wb') as fl:
             pickle.dump(df, fl)
