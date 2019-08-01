@@ -4,6 +4,9 @@ import numpy as np
 from influxdb import InfluxDBClient
 from concurrent.futures import ProcessPoolExecutor
 import maya
+import grafica as grf
+from datetime import timedelta, datetime
+import influxQuery as ifx
 
 
 def mapeo_fechas(cadena):
@@ -12,7 +15,7 @@ def mapeo_fechas(cadena):
 
 def query_zeros(fecha_inicio, fecha_fin):
     cliente = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
-    consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE angulo_sensor<= 2 and angulo_sensor>= -2 and id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
+    consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE angulo_sensor<= 6 and angulo_sensor>= -6 and id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
     resultado = cliente.query(consulta)
     cliente.close()
 
@@ -24,6 +27,43 @@ def query_zeros(fecha_inicio, fecha_fin):
     df.pop('Fecha')
     return df
 
+
+def monotonia(dataframe):
+    dataframe['ángulo siguiente'] = dataframe['Angulo'].shift(periods=-1)
+    dataframe.drop(dataframe.index[-1], inplace=True)
+    dataframe['diferencia'] = dataframe['Angulo'] - dataframe['ángulo siguiente']
+
+    fechas_monotonia = {}
+    row = 0
+    while row < len(dataframe):
+        if dataframe['diferencia'].iloc[row] > 0:  # Cerrando
+            fecha_inicio = dataframe['fecha'].iloc[row]
+            i = row + 1
+            if i<len(dataframe):
+                while dataframe['diferencia'].iloc[i] > 0 and i < len(dataframe):
+                    i += 1
+            fecha_fin = dataframe['fecha'].iloc[i - 1]
+            half_sec = (fecha_fin - fecha_inicio).total_seconds() / 2
+            fecha_central = fecha_inicio + timedelta(seconds=half_sec)
+            row = i
+            flag = 0
+        elif dataframe['diferencia'].iloc[row] <= 0:  # Abriendo
+            fecha_inicio = dataframe['fecha'].iloc[row]
+            i = row + 1
+            if i<len(dataframe):
+                while dataframe['diferencia'].iloc[i] <= 0 and i < len(dataframe):
+                    i += 1
+            fecha_fin = dataframe['fecha'].iloc[i - 1]
+            half_sec = (fecha_fin - fecha_inicio).total_seconds() / 2
+            fecha_central = fecha_inicio + timedelta(seconds=half_sec)
+            row = i
+            flag = 1
+        fechas_monotonia[str(fecha_central)] = flag
+    return fechas_monotonia
+
+def last_query():
+
+    return
 
 ruta = '/media/arielmardones/HS/SensoVal/'
 query_bckup = ruta + 'query_influx_sensoVal.txt'
@@ -53,8 +93,11 @@ segmentación['diferencia'] = segmentación['diferencia'] / np.timedelta64(1, 's
 sectores_con_transiente = segmentación.loc[segmentación['diferencia'] > intervalo_tiempo + 15]
 
 for row in range(len(sectores_con_transiente)):
-    angulos_ceros = query_zeros(sectores_con_transiente['fecha_inicio'].iloc[row], sectores_con_transiente['fecha_fin'].iloc[row])
-
-
+    entorno_cero = query_zeros(sectores_con_transiente['inicio'].iloc[row], sectores_con_transiente['fin'].iloc[row])
+    dicc_transientes = monotonia(entorno_cero)
+    for key, value in dicc_transientes:
+        df_transiente=last_query(key)
+        last_df = ifx.ventana(list(df_transiente['Angulo']), value)
+        grf.gráfica_transición(fecha, angulos)
 
 print('')
