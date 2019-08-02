@@ -20,8 +20,8 @@ def plot_elbow(score):
     return
 
 
-def gráfica_transición(fechas, angulos):
-    if angulos:
+def gráfica_transición(fechas, angulos, *args):
+    if angulos.size != 0:
         dia = mdates.SecondLocator(interval=2)
         dia_formato = mdates.DateFormatter('%d-%H:%M:%S')
 
@@ -38,11 +38,14 @@ def gráfica_transición(fechas, angulos):
 
         ax.set_xlabel('Tiempo (s)', fontsize=16)
         ax.set_ylabel('Ángulo (°)', fontsize=16)
-        ax.set_title('Transición', fontsize=18)
 
         ax.scatter(fechas, angulos, alpha=0.3)
-
-        fig.savefig(f'/media/arielmardones/HS/SensoVal/Imágenes/{str(fechas[0].day) + "-" + str(fechas[0].month)+ " " + str(fechas[0].minute)}')
+        if args:
+            ax.set_title(f'Transición {args[0]}', fontsize=18)
+            fig.savefig(f'/media/arielmardones/HS/SensoVal/Imágenes/{args[0]} {str(fechas[0].month) + "-" + str(fechas[0].day) + " " + str(fechas[0].hour) + ":" + str(fechas[0].minute)}')
+        else:
+            ax.set_title(f'Transición', fontsize=18)
+            fig.savefig(f'/media/arielmardones/HS/SensoVal/Imágenes/{str(fechas[0].month) + "-" + str(fechas[0].day) + " " + str(fechas[0].hour) + ":" + str(fechas[0].minute)}')
     return
 
 

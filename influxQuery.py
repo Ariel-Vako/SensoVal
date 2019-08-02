@@ -58,7 +58,7 @@ def ventana(cadena_angulos, flag):
 
         i = 0
         buscar_inicio = cadena_angulos[-1]
-        while buscar_inicio < 40 and i < len(cadena_angulos):
+        while buscar_inicio < 39 and i < len(cadena_angulos):
             index_inicio -= 1
             buscar_inicio = cadena_angulos[index_inicio]
             i += 1
@@ -74,7 +74,7 @@ def ventana(cadena_angulos, flag):
         i = 0
         index_inicio = len(cadena_angulos)
         buscar_inicio = cadena_angulos[-1]
-        while buscar_inicio > -40 and i < len(cadena_angulos):
+        while buscar_inicio > -39 and i < len(cadena_angulos):
             index_inicio -= 1
             buscar_inicio = cadena_angulos[index_inicio]
             i += 1
