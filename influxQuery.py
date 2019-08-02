@@ -5,7 +5,7 @@ import os.path
 import maya
 import clustering as clu
 import datetime as dt
-from concurrent.futures import ProcessPoolExecutor
+from datetime import datetime
 
 
 def mapeo_fechas(cadena):
@@ -21,9 +21,7 @@ def query_generator_cierre(fecha_fin):
     cliente.close()
 
     df = pd.DataFrame(list(resultado.get_points()))
-
-    e = ProcessPoolExecutor()
-    fechas_cierre = list(e.map(mapeo_fechas, df['Fecha']))
+    fechas_cierre = list(map(mapeo_fechas, df['Fecha']))
 
     ii, ifl = ventana(list(df['Angulo']), 0)
     if ii == 0 and ifl == 0:
@@ -42,8 +40,7 @@ def query_generator_apertura(fecha_inicio):
 
     df = pd.DataFrame(list(resultado.get_points()))
 
-    e = ProcessPoolExecutor()
-    fechas_apertura = list(e.map(mapeo_fechas, df['Fecha']))
+    fechas_apertura = list(map(mapeo_fechas, df['Fecha']))
 
     ii, ifl = ventana(list(df['Angulo']), 1)
     if ii == 0 and ifl == 0:
@@ -53,6 +50,7 @@ def query_generator_apertura(fecha_inicio):
 
 
 def ventana(cadena_angulos, flag):
+    print(f'[{datetime.now()}] Inicio: Ventana')
     if flag == 0:  # cerrando
         index_inicio = len(cadena_angulos)
 
@@ -84,7 +82,7 @@ def ventana(cadena_angulos, flag):
         while buscar_final < 40 and index_final < len(cadena_angulos) - 1:
             index_final += 1
             buscar_final = cadena_angulos[index_final]
-
+    print(f'[{datetime.now()}] Fin: Ventana')
     return index_inicio, index_final
 
 
@@ -122,8 +120,7 @@ if __name__ == '__main__':
         df = pd.DataFrame(list(result.get_points()))
         # fecha = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
 
-        e = ProcessPoolExecutor()
-        fecha = list(e.map(mapeo_fechas, df['Fecha']))
+        fecha = list(map(mapeo_fechas, df['Fecha']))
         df['fecha'] = fecha
         df.pop('Fecha')
 

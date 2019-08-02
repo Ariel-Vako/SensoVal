@@ -1,8 +1,10 @@
 import matplotlib.pyplot as plt
 import pickle
+import matplotlib
 import matplotlib.dates as mdates
 from matplotlib.ticker import MultipleLocator
-
+from datetime import datetime
+matplotlib.use('Agg')
 
 # Gráfica de codo mensual para escoger n
 def plot_elbow(score):
@@ -21,6 +23,7 @@ def plot_elbow(score):
 
 
 def gráfica_transición(fechas, angulos, *args):
+    print(f'[{datetime.now()}] Inicio: Gráfica Transición')
     if angulos.size != 0:
         dia = mdates.SecondLocator(interval=2)
         dia_formato = mdates.DateFormatter('%d-%H:%M:%S')
@@ -46,6 +49,7 @@ def gráfica_transición(fechas, angulos, *args):
         else:
             ax.set_title(f'Transición', fontsize=18)
             fig.savefig(f'/media/arielmardones/HS/SensoVal/Imágenes/{str(fechas[0].month) + "-" + str(fechas[0].day) + " " + str(fechas[0].hour) + ":" + str(fechas[0].minute)}')
+    print(f'[{datetime.now()}] Fin: Gráfica Transición')
     return
 
 
