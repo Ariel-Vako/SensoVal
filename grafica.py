@@ -4,7 +4,9 @@ import matplotlib
 import matplotlib.dates as mdates
 from matplotlib.ticker import MultipleLocator
 from datetime import datetime
+
 matplotlib.use('Agg')
+
 
 # Gráfica de codo mensual para escoger n
 def plot_elbow(score):
@@ -44,11 +46,11 @@ def gráfica_transición(fechas, angulos, *args):
 
         ax.scatter(fechas, angulos, alpha=0.3)
         if args:
-            ax.set_title(f'Transición {args[0]}', fontsize=18)
-            fig.savefig(f'/media/arielmardones/HS/SensoVal/Imágenes/{args[0]} {str(fechas[0].month) + "-" + str(fechas[0].day) + " " + str(fechas[0].hour) + ":" + str(fechas[0].minute)}')
+            ax.set_title(f'Transición {fechas[0]}', fontsize=18)
+            fig.savefig(f'/media/arielmardones/HS/SensoVal/Imágenes/val6/{args[0]} + {str(fechas[0].year) + "-" + str(fechas[0].month) + "-" + str(fechas[0].day) + " " + str(fechas[0].hour) + ":" + str(fechas[0].minute)}')
         else:
-            ax.set_title(f'Transición', fontsize=18)
-            fig.savefig(f'/media/arielmardones/HS/SensoVal/Imágenes/{str(fechas[0].month) + "-" + str(fechas[0].day) + " " + str(fechas[0].hour) + ":" + str(fechas[0].minute)}')
+            ax.set_title(f'Transición {fechas[0]}', fontsize=18)
+            fig.savefig(f'/media/arielmardones/HS/SensoVal/Imágenes/val6/{str(fechas[0].year) + "-" + str(fechas[0].month) + "-" + str(fechas[0].day) + " " + str(fechas[0].hour) + ":" + str(fechas[0].minute)}')
     print(f'[{datetime.now()}] Fin: Gráfica Transición')
     return
 
