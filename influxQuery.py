@@ -12,11 +12,11 @@ def mapeo_fechas(cadena):
     return maya.MayaDT.from_rfc3339(cadena).datetime()
 
 
-def query_generator_cierre(fecha_fin):
+def query_generator_cierre(fecha_fin, valvula):
     fecha_inicio = fecha_fin - dt.timedelta(seconds=60)
 
     cliente = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
-    consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
+    consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '{}' AND time  >= '{}' AND time<= '{}'".format(valvula, fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
     resultado = cliente.query(consulta)
     cliente.close()
 
@@ -30,11 +30,11 @@ def query_generator_cierre(fecha_fin):
         return df['Angulo'][ii - 1:ifl + 1], fechas_cierre[ii - 1: ifl + 1]
 
 
-def query_generator_apertura(fecha_inicio):
+def query_generator_apertura(fecha_inicio, valvula):
     fecha_fin = fecha_inicio + dt.timedelta(seconds=60)
 
     cliente = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
-    consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
+    consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(valvula, fecha_inicio.strftime("%Y-%m-%d %H:%M:%S"), fecha_fin.strftime("%Y-%m-%d %H:%M:%S"))
     resultado = cliente.query(consulta)
     cliente.close()
 
@@ -56,14 +56,14 @@ def ventana(cadena_angulos, flag):
 
         i = 0
         buscar_inicio = cadena_angulos[-1]
-        while buscar_inicio < 39 and i < len(cadena_angulos):
+        while buscar_inicio <= 40 and i < len(cadena_angulos):
             index_inicio -= 1
             buscar_inicio = cadena_angulos[index_inicio]
             i += 1
 
         index_final = 0
         buscar_final = cadena_angulos[0]
-        while buscar_final > -40 and index_final < len(cadena_angulos) - 1:
+        while buscar_final > -35 and index_final < len(cadena_angulos) - 1:
             index_final += 1
             buscar_final = cadena_angulos[index_final]
 
@@ -72,14 +72,14 @@ def ventana(cadena_angulos, flag):
         i = 0
         index_inicio = len(cadena_angulos)
         buscar_inicio = cadena_angulos[-1]
-        while buscar_inicio > -39 and i < len(cadena_angulos):
+        while buscar_inicio > -35 and i < len(cadena_angulos):
             index_inicio -= 1
             buscar_inicio = cadena_angulos[index_inicio]
             i += 1
 
         index_final = 0
         buscar_final = cadena_angulos[0]
-        while buscar_final < 40 and index_final < len(cadena_angulos) - 1:
+        while buscar_final <= 40 and index_final < len(cadena_angulos) - 1:
             index_final += 1
             buscar_final = cadena_angulos[index_final]
     print(f'[{datetime.now()}] Fin: Ventana')
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     desired_width = 320
     pd.set_option('display.width', desired_width)
     pd.set_option('display.max_columns', 1000)
-
+    valvula = 9  # TODO: VALVULA
     # client = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
     # # Listado de bases de datos
     # pd.DataFrame(client.get_list_database())  # [{'name': '_internal'}, {'name': 'SVALVIA_MCL'}, {'name': 'ssi_mlp_sag2_c1'}, {'name': 'Datos_SAG2_MLP'}, {'name': 'FLEETSAFETY'}, {'name': 'SPT_DMH'}]
@@ -110,13 +110,13 @@ if __name__ == '__main__':
     # field_names = list(pd.DataFrame(query_field_names.get_points()).columns.values)
 
     # first time
-    ruta = '/media/arielmardones/HS/SensoVal/'
-    query_bckup = ruta + 'query_influx_sensoVal.txt'
-    fecha_file = ruta + 'fechas.txt'
+    ruta = f'/media/arielmardones/HS/SensoVal/Datos/val{valvula}/'
+    query_bckup = ruta + f'query_influx_sensoVal{valvula}.txt'
+    fecha_file = ruta + f'fechas_val{valvula}.txt'
     if not os.path.isfile(query_bckup):
         client = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
 
-        result = client.query("SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '6' and angulo_sensor<= -40  AND time < '2019-04-30'")
+        result = client.query("SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE id_sensor = '{}' and angulo_sensor<= -36  AND time < '2019-07-01' AND time > '2018-08-01'".format(valvula))
         df = pd.DataFrame(list(result.get_points()))
         # fecha = [maya.MayaDT.from_rfc3339(ee).datetime() for ee in df['Fecha']]
 
@@ -153,7 +153,7 @@ if __name__ == '__main__':
     # plt.setp(ax.get_xticklabels(), rotation=45)
 
     # Cálculo de número de cluster por mes
-    score = clu.n_monthly(fecha)
+    # score = clu.n_monthly(fecha)
 
     # Guardar la inercia de los cluster.- SOLO LA PRIMERA VEZ!
     # inercia = ruta + '/inercia.txt'
