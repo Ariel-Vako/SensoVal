@@ -19,11 +19,11 @@ df = pd.DataFrame(columns=('fecha', 'x', 'y', 'z'))
 cont = 0
 for row in results:
     xyz = row[1].split('|')
-    df_aux = pd.DataFrame(xyz)
-    for fila in df_aux:
+    df_aux = pd.DataFrame(xyz, columns=['data'])
+    for fila in df_aux['data']:
         u = fila.split(',')
-        df['x'].iloc[cont] = u[0]
-        df['y'].iloc[cont] = u[0]
-        df['z'].iloc[cont] = u[0]
+        df.iat[cont, 1] = u[0]
+        df.iat[cont, 2] = u[0]
+        df.iat[cont, 3] = u[0]
         cont += 1
 db.close()
