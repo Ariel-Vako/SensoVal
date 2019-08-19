@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import struct
 
+now = datetime.now()
 db = MySQLdb.connect(host='192.168.0.178',
                      port=3306,
                      user="amardones",
@@ -13,17 +14,21 @@ cursor = db.cursor()
 # consulta = "SELECT id_reg AS ID, time AS Timespam, id_sensor as Sensor, cast( data_sensor AS CHAR) as Data FROM svia_data WHERE id_sensor = 6 ORDER BY id_reg ASC LIMIT 10;"
 consulta = "SELECT time AS Timespam, cast( data_sensor AS CHAR) FROM svia_data WHERE id_sensor = 6 ORDER BY id_reg ASC LIMIT 10;"
 cursor.execute(consulta)
+db.close()
 results = cursor.fetchall()
 
-df = pd.DataFrame(columns=('fecha', 'x', 'y', 'z'))
-cont = 0
+
+time2 = datetime.now()
+print(f'Tiempo respuesta query: {time2 - now}')
+
+df = pd.DataFrame(columns=('x', 'y', 'z'))
 for row in results:
-    xyz = row[1].split('|')
-    df_aux = pd.DataFrame(xyz, columns=['data'])
+    df_aux = pd.DataFrame(row[1].split('|'), columns=['data'])
+    df_aux = df_aux[:, -1]
+    n = len(df_aux)
     for fila in df_aux['data']:
         u = fila.split(',')
-        df.iat[cont, 1] = u[0]
-        df.iat[cont, 2] = u[0]
-        df.iat[cont, 3] = u[0]
-        cont += 1
-db.close()
+        df = df.append(pd.DataFrame([u], columns=df.columns), ignore_index=True)
+
+time3 = datetime.now()
+print(f'Tiempo de transformación a Dataframe: {time3-time2}')
