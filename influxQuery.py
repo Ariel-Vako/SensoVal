@@ -56,14 +56,14 @@ def ventana(cadena_angulos, flag):
 
         i = 0
         buscar_inicio = cadena_angulos[-1]
-        while buscar_inicio <= 40 and i < len(cadena_angulos):
+        while buscar_inicio <= 39 and i < len(cadena_angulos):
             index_inicio -= 1
             buscar_inicio = cadena_angulos[index_inicio]
             i += 1
 
         index_final = 0
         buscar_final = cadena_angulos[0]
-        while buscar_final > -35 and index_final < len(cadena_angulos) - 1:
+        while buscar_final > -39 and index_final < len(cadena_angulos) - 1:
             index_final += 1
             buscar_final = cadena_angulos[index_final]
 
@@ -72,14 +72,14 @@ def ventana(cadena_angulos, flag):
         i = 0
         index_inicio = len(cadena_angulos)
         buscar_inicio = cadena_angulos[-1]
-        while buscar_inicio > -35 and i < len(cadena_angulos):
+        while buscar_inicio > -39 and i < len(cadena_angulos):
             index_inicio -= 1
             buscar_inicio = cadena_angulos[index_inicio]
             i += 1
 
         index_final = 0
         buscar_final = cadena_angulos[0]
-        while buscar_final <= 40 and index_final < len(cadena_angulos) - 1:
+        while buscar_final <= 39 and index_final < len(cadena_angulos) - 1:
             index_final += 1
             buscar_final = cadena_angulos[index_final]
     print(f'[{datetime.now()}] Fin: Ventana')
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     desired_width = 320
     pd.set_option('display.width', desired_width)
     pd.set_option('display.max_columns', 1000)
-    valvula = 9  # TODO: VALVULA
+    valvula = 6  # TODO: VALVULA
     # client = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
     # # Listado de bases de datos
     # pd.DataFrame(client.get_list_database())  # [{'name': '_internal'}, {'name': 'SVALVIA_MCL'}, {'name': 'ssi_mlp_sag2_c1'}, {'name': 'Datos_SAG2_MLP'}, {'name': 'FLEETSAFETY'}, {'name': 'SPT_DMH'}]

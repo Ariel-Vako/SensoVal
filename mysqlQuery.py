@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import numpy as np
 
 
-def query_mysql(fecha_inicio='2019-05-25 17:15:45', fecha_fin='2019-05-25 17:16:45'):
+def query_mysql(fecha_inicio='2019-05-25 21:19:40', fecha_fin='2019-05-25 21:21:00'):
     now = datetime.now()
     db = MySQLdb.connect(host='192.168.0.178',
                          port=3306,
@@ -25,7 +25,7 @@ def query_mysql(fecha_inicio='2019-05-25 17:15:45', fecha_fin='2019-05-25 17:16:
     cont = 0
     index = 0
     df = pd.DataFrame(columns=('x', 'y', 'z'))
-    u = pd.Series()
+    # u = pd.Series()
     for ind, row in enumerate(results):
         df_aux = pd.DataFrame(row[1].split('|'), columns=['data'])
         df_aux = df_aux[: -1]
@@ -39,7 +39,9 @@ def query_mysql(fecha_inicio='2019-05-25 17:15:45', fecha_fin='2019-05-25 17:16:
             df.loc[cont, :] = u
             cont += 1
 
-    df.astype(int)
+    df['x'] = pd.to_numeric(df.x)
+    df['y'] = pd.to_numeric(df.y)
+    df['z'] = pd.to_numeric(df.z)
 
     time3 = datetime.now()
     print(f'Tiempo de transformación a Dataframe: {time3 - time2}')

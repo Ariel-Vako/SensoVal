@@ -93,7 +93,7 @@ def last_query(date, valvula):
     return df
 
 
-valvula = 9  # TODO: VALVULA
+valvula = 6  # TODO: VALVULA
 ruta = f'/media/arielmardones/HS/SensoVal/Datos/val{valvula}/'
 query_bckup = ruta + f'query_influx_sensoVal{valvula}.txt'
 
@@ -121,6 +121,8 @@ segmentación['diferencia'] = segmentación['diferencia'] / np.timedelta64(1, 's
 # Sectores
 sectores_con_transiente = segmentación.loc[segmentación['diferencia'] > intervalo_tiempo + 10]
 
+aperturas = []
+cierres = []
 for row in range(len(sectores_con_transiente)):
     print(f'[{datetime.now()}] Fila: {row}')
     entorno_cero = query_zeros(sectores_con_transiente['inicio'].iloc[row], sectores_con_transiente['fin'].iloc[row], valvula)
@@ -131,6 +133,12 @@ for row in range(len(sectores_con_transiente)):
                 df_transiente = last_query(datetime.strptime(key.split('+')[0], '%Y-%m-%d %H:%M:%S.%f'), valvula)
             except ValueError:
                 df_transiente = last_query(datetime.strptime(key.split('+')[0], '%Y-%m-%d %H:%M:%S'), valvula)
-            grf.gráfica_transición(list(df_transiente['fecha']), df_transiente['Angulo'].values, valvula, "pre-formateo")
+            #grf.gráfica_transición(list(df_transiente['fecha']), df_transiente['Angulo'].values, valvula, "pre-formateo")
             i, f = ifx.ventana(df_transiente['Angulo'].values, value)
-            grf.gráfica_transición(list(df_transiente['fecha'].iloc[i:f]), df_transiente['Angulo'].iloc[i:f].values, valvula)
+            #grf.gráfica_transición(list(df_transiente['fecha'].iloc[i:f]), df_transiente['Angulo'].iloc[i:f].values, valvula)
+            if value == 0:
+                cierres.append(df_transiente['Angulo'].iloc[i:f].values)
+            else:
+                aperturas.append(df_transiente['Angulo'].iloc[i:f].values)
+
+print('')
