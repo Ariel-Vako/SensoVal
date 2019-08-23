@@ -141,4 +141,12 @@ for row in range(len(sectores_con_transiente)):
             else:
                 aperturas.append(df_transiente['Angulo'].iloc[i:f].values)
 
-print('')
+ruta = f'/media/arielmardones/HS/SensoVal/Datos/val{valvula}/'
+file_apertura = ruta + f'Aperturas_val{valvula}'
+file_cierre = ruta + f'Cierres_val{valvula}'
+
+with open(file_apertura, 'wb') as fl:
+    pickle.dump(aperturas,fl)
+
+with open(file_cierre, 'wb') as fl2:
+    pickle.dump(cierres, fl2)

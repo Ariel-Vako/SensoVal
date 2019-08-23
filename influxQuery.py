@@ -56,14 +56,14 @@ def ventana(cadena_angulos, flag):
 
         i = 0
         buscar_inicio = cadena_angulos[-1]
-        while buscar_inicio <= 39 and i < len(cadena_angulos):
+        while buscar_inicio <= 38 and i < len(cadena_angulos):
             index_inicio -= 1
             buscar_inicio = cadena_angulos[index_inicio]
             i += 1
 
         index_final = 0
         buscar_final = cadena_angulos[0]
-        while buscar_final > -39 and index_final < len(cadena_angulos) - 1:
+        while buscar_final > -40 and index_final < len(cadena_angulos) - 1:
             index_final += 1
             buscar_final = cadena_angulos[index_final]
 
@@ -79,7 +79,7 @@ def ventana(cadena_angulos, flag):
 
         index_final = 0
         buscar_final = cadena_angulos[0]
-        while buscar_final <= 39 and index_final < len(cadena_angulos) - 1:
+        while buscar_final <= 38 and index_final < len(cadena_angulos) - 1:
             index_final += 1
             buscar_final = cadena_angulos[index_final]
     print(f'[{datetime.now()}] Fin: Ventana')

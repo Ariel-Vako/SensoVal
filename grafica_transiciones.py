@@ -2,9 +2,11 @@ import pickle
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+# import busqueda_paralela
 
 sns.set(style="whitegrid")
 
+# busqueda_paralela
 valvula = 6
 ruta = f'/media/arielmardones/HS/SensoVal/Datos/val{valvula}/'
 file_apertura = ruta + f'Aperturas_val{valvula}'
