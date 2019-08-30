@@ -2,11 +2,27 @@ import pickle
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.optimize import curve_fit
+from scipy.optimize import least_squares
+import pandas as pd
 
 
 # import busqueda_paralela
-def logistica(t, b, miu, k, a, ñ):
+def logistica_y(param, t, y):
+    k = param[0]
+    a = param[1]
+    b = param[2]
+    ñ = param[3]
+    miu = param[4]
+    # k = 38
+    return k + (a - k) / (1 + np.exp(-b * (t - ñ))) ** (1 / miu) - y
+
+
+def logistica(param, t):
+    k = param[0]
+    a = param[1]
+    b = param[2]
+    ñ = param[3]
+    miu = param[4]
     return k + (a - k) / (1 + np.exp(-b * (t - ñ))) ** (1 / miu)
 
 
@@ -40,39 +56,59 @@ for i in range(len(aperturas)):
 # Alinear al final todas las listas
 u = max([len(s) for s in aperturas])
 
+aperturas1 = []
 for i in range(len(aperturas0)):
-    n = len(aperturas0[i])
-    x = np.linspace(0, n - 1, n)
+    na = len(aperturas0[i])
+    x = np.linspace(0, na - 1, na)
+    aperturas1.append(list(zip(x, aperturas[i])))
     axes.scatter(x, aperturas0[i], alpha=0.3)
     axes.set_xlabel('Tiempo [s]', fontsize=10)
     axes.set_ylabel('Ángulo [°]', fontsize=10)
 
-# Gráfica conjunta de aperturas
+# Construir DataFrames de pares ordenados
+# Aperturas (Flat_list)
+flat_apert = [item for sublist in aperturas1 for item in sublist]
+dfa = pd.DataFrame(flat_apert, columns=['x', 'angulo'])
 
+# Ajuste de Regresiones logísticas para transiciones
+x0 = [39.0, -40.0, 1.0, 1.0, 1.0]
+for i in range(300):
+    # Bootstrapping: Resampling with replacement
+    sample_index = np.random.choice(range(len(dfa)), 100)
+    par_open = least_squares(logistica_y, x0, args=(dfa['x'].loc[sample_index].values, dfa['angulo'].loc[sample_index].values), loss='soft_l1', f_scale=0.1, bounds=([38, -100.0, -np.inf, 0, -np.inf], [np.inf, -39, 2, np.inf, np.inf]))
+    # plt.plot(dfa['x'].values, logistica(dfa['x'].values, *par_open), 'b--')
+    xa = np.linspace(0, 29, 30)
+    plt.plot(xa, logistica(par_open.x, xa), color='grey', alpha=0.2, zorder=1)
+
+par_open = least_squares(logistica_y, x0, args=(dfa['x'].values, dfa['angulo'].values), loss='soft_l1', f_scale=0.1, bounds=([38, -100.0, -np.inf, 0, -np.inf], [np.inf, -39, 2, np.inf, np.inf]))
+plt.plot(xa, logistica(par_open.x, xa), color='red', alpha=0.4, zorder=1)
+
+# Gráfica conjunta de aperturas
 axes = f.add_subplot(122)
 
 sns.despine(f, left=True, bottom=True)
 
 cierres0 = []
 for i in range(len(cierres)):
-    n = len(cierres[i])
-    x = np.linspace(0, n - 1, n)
-    if all(item < -10 for item in cierres[i][n - 4:n]):
-        cierres0.append(cierres[i])
+    nc = len(cierres[i])
+    x = np.linspace(0, nc - 1, nc)
+    if all(item < -10 for item in cierres[i][nc - 4:nc]):
+        cierres0.append(list(zip(x, cierres[i])))
         axes.scatter(x, cierres[i], alpha=0.3)
-        axes.set_xlabel('Tiempo [s]', fontsize=10)
-        axes.set_ylabel('Ángulo [°]', fontsize=10)
+        axes.set_xlabel('Tiempo [$s$]', fontsize=10)
+        axes.set_ylabel('Ángulo [$°$]', fontsize=10)
+
+# Cierres
+flat_cierre = [item for sublist in cierres0 for item in sublist]
+dfc = pd.DataFrame(flat_cierre, columns=['x', 'angulo'])
+
+# Ajuste de Regresiones logísticas para transiciones
+x0 = [39.0, -40.0, 1.0, 1.0, 1.0]
+par_open = least_squares(logistica_y, x0, args=(dfc['x'].values, dfc['angulo'].values), loss='soft_l1', f_scale=0.1, bounds=([38, -100.0, -np.inf, 0, -np.inf], [np.inf, -39, 2, np.inf, np.inf]))
+# plt.plot(dfa['x'].values, logistica(dfa['x'].values, *par_open), 'b--')
+xc = np.linspace(0, 29, 30)
+plt.plot(xc, logistica(par_open.x, xa), '-', label='Robust Ftting')
 
 plt.show()
 
-# Construir array de pares ordenados para
-# Aperturas
-
-# Cierres
-
-# Ajuste de Regresiones logísticas
-u = np.arange(4500, 10001, 1, dtype=int)
-popt2, pcov = curve_fit(logistica, u, df2['y'], bounds=([0.0005, 0.001], [0.001, 2]))
-plt.plot(u, logistica(u, *popt2), 'g--')
-print(popt2)
 print('')

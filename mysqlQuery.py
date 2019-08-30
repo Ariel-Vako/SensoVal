@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import numpy as np
 
 
-def query_mysql(fecha_inicio='2019-05-25 21:19:40', fecha_fin='2019-05-25 21:21:00'):
+def query_mysql(fecha_inicio='2019-05-25', fecha_fin='2019-05-25'):
     now = datetime.now()
     db = MySQLdb.connect(host='192.168.0.178',
                          port=3306,
