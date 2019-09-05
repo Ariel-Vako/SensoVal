@@ -3,6 +3,8 @@ import seaborn as sns
 import numpy as np
 import collections
 import scipy.stats
+from sklearn.preprocessing import PolynomialFeatures
+import pandas as pd
 
 
 def calculate_entropy(list_values):
@@ -40,22 +42,19 @@ def get_features(list_values):
     return [entropy] + crossings + statistics
 
 
-def artificial_variables(charact):
-
+def artificial_variables(features):
+    original_features = pd.DataFrame(features, columns=['Entropy', 'Amount zero crossing', 'Amount mean crossing', 'n5', 'n25', 'n75', 'n95', 'median', 'mean', 'std', 'var', 'rms'])
+    plastic = []
+    for char in features:
+        plastic.append()
     return
 
 
-def get_sensoval_features(ecg_data, ecg_labels, waveletname):
-    list_features = []
-    list_unique_labels = list(set(ecg_labels))
-    list_labels = [list_unique_labels.index(elem) for elem in ecg_labels]
-    for signal in ecg_data:
-        list_coeff = pywt.wavedec(signal, waveletname)
-        features = []
-        for coeff in list_coeff:
-            features += get_features(coeff)
-        list_features.append(features)
-    return list_features, list_labels
+def get_sensoval_features(listado_transiente):
+    features = []
+    for curva in listado_transiente:
+        features += get_features(curva)
+    return features
 
 
 sns.set(style="whitegrid")
