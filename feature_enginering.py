@@ -1,9 +1,6 @@
-import pickle
-import seaborn as sns
 import numpy as np
 import collections
 import scipy.stats
-from sklearn.preprocessing import PolynomialFeatures
 import pandas as pd
 
 
@@ -45,10 +42,11 @@ def get_features(list_values):
 def artificial_variables(features):
     col_names = ['Entropy', 'Amount zero crossing', 'Amount mean crossing', 'n5', 'n25', 'n75', 'n95', 'median', 'mean', 'std', 'var', 'rms']
     n = len(col_names)
+    m = len(features)
     original_features = pd.DataFrame(features, columns=col_names)
-    poly2 = pd.DataFrame(data=np.full([n, n * (n - 1) // 2], np.nan))
-    ratios_upper = pd.DataFrame(data=np.full([n, n * (n - 1) // 2], np.nan))
-    ratios_lower = pd.DataFrame(data=np.full([n, n * (n - 1) // 2], np.nan))
+    poly2 = pd.DataFrame(data=np.full([m, n * (n - 1) // 2], np.nan))
+    ratios_upper = pd.DataFrame(data=np.full([m, n * (n - 1) // 2], np.nan))
+    ratios_lower = pd.DataFrame(data=np.full([m, n * (n - 1) // 2], np.nan))
 
     # poly2
     cont = 0
@@ -97,7 +95,7 @@ def artificial_variables(features):
 
     # Exponential
     col_exp = ['exp(' + cn + ')' for cn in col_names]
-    exp = original_features.apply(lambda x: np.exp(x))
+    exp = original_features.apply(lambda x: np.exp(x / 10e3))
     exp.rename(columns=dict(zip(col_names, col_exp)), inplace=True)
 
     # Inverse
@@ -117,20 +115,19 @@ def get_sensoval_features(listado_transiente):
     return features
 
 
-sns.set(style="whitegrid")
+def clean(dataframe):
+    # Replace inf by NaN
+    dataframe.replace([np.inf, -np.inf], np.nan, inplace=True)
 
-# busqueda_paralela
-valvula = 6
-ruta = f'/media/arielmardones/HS/SensoVal/Datos/val{valvula}/'
-file_apertura = ruta + f'Aperturas_val{valvula}'
-file_cierre = ruta + f'Cierres_val{valvula}'
+    # Eliminar columnas que contengan %NaN
+    dataframe.dropna(axis=1, inplace=True)
 
-with open(file_apertura, 'rb') as fl:
-    aperturas = pickle.load(fl)
+    # Eliminate columns with one unique value
+    u = [c for c in dataframe.columns if dataframe[c].nunique() < 2]
+    dataframe.drop(u, axis=1)
 
-with open(file_cierre, 'rb') as fl2:
-    cierres = pickle.load(fl2)
+    # Eliminate columns with concentration over 75% (Risk Modeling)
+    # I dont gonna drop columns with concentrate bcz they have
+    # the anormality that I look for.
 
-features = get_sensoval_features(aperturas)
-df = artificial_variables(features)
-df_clean = clean(df)
+    return dataframe
