@@ -8,7 +8,7 @@ import numpy as np
 sns.set(style="whitegrid")
 
 # busqueda_paralela
-valvula = 6
+valvula = params.valvula
 ruta = params.ruta
 file_apertura = ruta + f'Aperturas_val{valvula}'
 file_cierre = ruta + f'Cierres_val{valvula}'
@@ -27,7 +27,7 @@ df = fe.artificial_variables(features)
 df_clean = fe.clean(df)
 
 # Componentes Principales
-caract, pca = grp.componentes_principales(df_clean)
+caract, pca = grp.componentes_principales(df_clean, params.no_pca)
 print(f'Varianza Explicada: {100 * np.round(np.sum(pca.explained_variance_ratio_), 4)}%')
 
 # Métricas para determinar cantidad de cluster y método a utilizar

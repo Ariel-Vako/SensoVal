@@ -9,6 +9,7 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import sklearn.metrics
 from sklearn.preprocessing import StandardScaler
+import params
 
 
 def clustering(signal_features, no_cluster=7):
@@ -50,10 +51,10 @@ def clustering(signal_features, no_cluster=7):
             db, optics, brc]
 
 
-def componentes_principales(df_features):
+def componentes_principales(df_features, n):
     # features = preprocessing.normalize(features)
     df_features_standard = StandardScaler().fit_transform(df_features)
-    pca = PCA(n_components=8)
+    pca = PCA(n_components=n)
     caract = pca.fit_transform(df_features_standard)
     return caract, pca
 
@@ -113,18 +114,21 @@ def graficar_pca(matriz, labels, i):
 
 
 def métricas(signal_features):
+    n = params.no_cluster
+    u = range(2, n)
+    size = len(u)
+
     # Métooo para definición de método de clustering y cantidad de clusters
+    df_kmeans = pd.DataFrame(data=np.full([size, 3], np.nan), columns=['ss kmeans', 'ch kmeas', 'db kmeans'])
+    df_mbatch = pd.DataFrame(data=np.full([size, 3], np.nan), columns=['ss mbatch', 'ch mbatch', 'db mbatch'])
+    df_affin = pd.DataFrame(data=np.full([size, 3], np.nan), columns=['ss affin', 'ch affin', 'db affin'])
+    df_ward = pd.DataFrame(data=np.full([size, 3], np.nan), columns=['ss Ward', 'ch Ward', 'db Ward'])
+    df_aver = pd.DataFrame(data=np.full([size, 3], np.nan), columns=['ss Average', 'ch Average', 'db Average'])
+    df_comp = pd.DataFrame(data=np.full([size, 3], np.nan), columns=['ss Complete', 'ch Complete', 'db Complete'])
+    df_single = pd.DataFrame(data=np.full([size, 3], np.nan), columns=['ss Single', 'ch Single', 'db Single'])
+    df_birch = pd.DataFrame(data=np.full([size, 3], np.nan), columns=['ss Birch', 'ch Birch', 'db Birch'])
 
-    df_kmeans = pd.DataFrame(data=np.full([4, 3], np.nan), columns=['ss kmeans', 'ch kmeas', 'db kmeans'])
-    df_mbatch = pd.DataFrame(data=np.full([4, 3], np.nan), columns=['ss mbatch', 'ch mbatch', 'db mbatch'])
-    df_affin = pd.DataFrame(data=np.full([4, 3], np.nan), columns=['ss affin', 'ch affin', 'db affin'])
-    df_ward = pd.DataFrame(data=np.full([4, 3], np.nan), columns=['ss Ward', 'ch Ward', 'db Ward'])
-    df_aver = pd.DataFrame(data=np.full([4, 3], np.nan), columns=['ss Average', 'ch Average', 'db Average'])
-    df_comp = pd.DataFrame(data=np.full([4, 3], np.nan), columns=['ss Complete', 'ch Complete', 'db Complete'])
-    df_single = pd.DataFrame(data=np.full([4, 3], np.nan), columns=['ss Single', 'ch Single', 'db Single'])
-    df_birch = pd.DataFrame(data=np.full([4, 3], np.nan), columns=['ss Birch', 'ch Birch', 'db Birch'])
-
-    for i in range(2, 6):
+    for i in u:
         cluster_kmeans = KMeans(n_clusters=i, random_state=0).fit(signal_features)
         df_kmeans.iloc[i - 2, :] = unidimensional_metrics(signal_features, cluster_kmeans.labels_)
 
@@ -140,41 +144,33 @@ def métricas(signal_features):
         df_ward.iloc[i - 2, :] = unidimensional_metrics(signal_features, cluster_ward.labels_)
 
         clustering_average = AgglomerativeClustering(linkage='average', n_clusters=i)
-        cluster = clustering_average.fit(signal_features)
-        ss = sklearn.metrics.silhouette_score(signal_features, cluster.labels_, metric='euclidean')
-        ch = sklearn.metrics.calinski_harabasz_score(signal_features, cluster.labels_)
-        db = sklearn.metrics.davies_bouldin_score(signal_features, cluster.labels_)
-        df_aver.iloc[i - 2, :] = [ss, ch, db]
+        cluster_average = clustering_average.fit(signal_features)
+        df_aver.iloc[i - 2, :] = unidimensional_metrics(signal_features, cluster_average.labels_)
 
         clustering_complete = AgglomerativeClustering(linkage='complete', n_clusters=i)
-        cluster = clustering_complete.fit(signal_features)
-        ss = sklearn.metrics.silhouette_score(signal_features, cluster.labels_, metric='euclidean')
-        ch = sklearn.metrics.calinski_harabasz_score(signal_features, cluster.labels_)
-        db = sklearn.metrics.davies_bouldin_score(signal_features, cluster.labels_)
-        df_comp.iloc[i - 2, :] = [ss, ch, db]
+        cluster_complete = clustering_complete.fit(signal_features)
+        df_comp.iloc[i - 2, :] = unidimensional_metrics(signal_features, cluster_complete.labels_)
 
         clustering_single = AgglomerativeClustering(linkage='single', n_clusters=i)
-        cluster = clustering_single.fit(signal_features)
-        ss = sklearn.metrics.silhouette_score(signal_features, cluster.labels_, metric='euclidean')
-        ch = sklearn.metrics.calinski_harabasz_score(signal_features, cluster.labels_)
-        db = sklearn.metrics.davies_bouldin_score(signal_features, cluster.labels_)
-        df_single.iloc[i - 2, :] = [ss, ch, db]
+        cluster_single = clustering_single.fit(signal_features)
+        df_single.iloc[i - 2, :] = unidimensional_metrics(signal_features, cluster_single.labels_)
 
         brc = Birch(branching_factor=100, n_clusters=i, threshold=20, compute_labels=True)
-        cluster = brc.fit(signal_features)
-        ss = sklearn.metrics.silhouette_score(signal_features, cluster.labels_, metric='euclidean')
-        ch = sklearn.metrics.calinski_harabasz_score(signal_features, cluster.labels_)
-        db = sklearn.metrics.davies_bouldin_score(signal_features, cluster.labels_)
-        df_birch.iloc[i - 2, :] = [ss, ch, db]
+        cluster_birch = brc.fit(signal_features)
+        df_birch.iloc[i - 2, :] = unidimensional_metrics(signal_features, cluster_birch.labels_)
 
-    df = pd.concat([df_kmens, df_mbatch, df_affin, df_ward, df_aver, df_comp, df_single, df_birch], axis=1, sort=False)
-    df.set_index([2, 3, 4, 5], inplace=True)
+    df = pd.concat([df_kmeans, df_mbatch, df_affin, df_ward, df_aver, df_comp, df_single, df_birch], axis=1, sort=False)
     df = df.reindex(sorted(df.columns), axis=1)
+    df.reindex(list(u))
     return df
 
 
 def unidimensional_metrics(signal, labels):
-    ss = sklearn.metrics.silhouette_score(signal, labels, metric='euclidean')
-    ch = sklearn.metrics.calinski_harabasz_score(signal, labels)
-    db = sklearn.metrics.davies_bouldin_score(signal, labels)
-    return [ss, ch, db]
+    l = pd.DataFrame(labels)
+    if l.nunique()[0] > 1:
+        ss = sklearn.metrics.silhouette_score(signal, labels, metric='euclidean')
+        ch = sklearn.metrics.calinski_harabasz_score(signal, labels)
+        db = sklearn.metrics.davies_bouldin_score(signal, labels)
+        return [ss, ch, db]
+    else:
+        return [np.nan, np.nan, np.nan]
