@@ -135,7 +135,7 @@ def métricas(signal_features):
         cluster_mnbatch = MiniBatchKMeans(n_clusters=i, random_state=0, max_iter=10).fit(signal_features)
         df_mbatch.iloc[i - 2, :] = unidimensional_metrics(signal_features, cluster_mnbatch.labels_)
 
-        affinity = np.exp(-euclidean_distances(signal_features) / np.std(signal_features))
+        affinity = np.exp(-euclidean_distances(signal_features) / np.std(signal_features, axis=1))
         labels_sc = spectral_clustering(affinity, n_clusters=i, eigen_solver='arpack')
         df_affin.iloc[i - 2, :] = unidimensional_metrics(signal_features, labels_sc)
 
