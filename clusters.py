@@ -13,42 +13,48 @@ import params
 
 
 def clustering(signal_features, no_cluster=7):
-    kmeans = KMeans(n_clusters=no_cluster, random_state=0).fit(signal_features)
-    mini_kmeans = MiniBatchKMeans(n_clusters=no_cluster, random_state=0, max_iter=10).fit(signal_features)
-    af = AffinityPropagation(preference=-10).fit(signal_features)
-
-    # --- Mean Shift
-    bandwidth = estimate_bandwidth(signal_features, quantile=0.8)
-    ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
-    ms.fit(signal_features)
-    # ms.labels_.max()
-
-    # --- Spectral Clustering
-    affinity = np.exp(-euclidean_distances(signal_features) / np.std(signal_features))
-    labels_sc = spectral_clustering(affinity, n_clusters=no_cluster, eigen_solver='arpack')
+    # kmeans = KMeans(n_clusters=no_cluster, random_state=0).fit(signal_features)
+    # mini_kmeans = MiniBatchKMeans(n_clusters=no_cluster, random_state=0, max_iter=10).fit(signal_features)
+    # af = AffinityPropagation(preference=-10).fit(signal_features)
+    #
+    # # --- Mean Shift
+    # bandwidth = estimate_bandwidth(signal_features, quantile=0.8)
+    # ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
+    # ms.fit(signal_features)
+    # # ms.labels_.max()
+    #
+    # # --- Spectral Clustering
+    # affinity = np.exp(-euclidean_distances(signal_features) / np.std(signal_features))
+    # labels_sc = spectral_clustering(affinity, n_clusters=no_cluster, eigen_solver='arpack')
+    #
+    # # --- Agglomerative Clustering - Solo métrica euclidiana
+    # clustering_ward = AgglomerativeClustering(linkage='ward', n_clusters=no_cluster)
+    # clustering_ward.fit(signal_features)
+    # clustering_average = AgglomerativeClustering(linkage='average', n_clusters=no_cluster)
+    # clustering_average.fit(signal_features)
+    # clustering_complete = AgglomerativeClustering(linkage='complete', n_clusters=no_cluster)
+    # clustering_complete.fit(signal_features)
+    # clustering_single = AgglomerativeClustering(linkage='single', n_clusters=no_cluster)
+    # clustering_single.fit(signal_features)
+    #
+    # # --- DBSCAN
+    # db = DBSCAN(eps=8, min_samples=6).fit(signal_features)
+    #
+    # # --- OPTICS
+    # optics = OPTICS(min_samples=6, xi=.05, min_cluster_size=.1)
+    # optics.fit(signal_features)
+    #
+    # # --- Birch
+    # brc = Birch(branching_factor=100, n_clusters=no_cluster, threshold=20, compute_labels=True)
+    # brc.fit(signal_features)
 
     # --- Agglomerative Clustering - Solo métrica euclidiana
-    clustering_ward = AgglomerativeClustering(linkage='ward', n_clusters=no_cluster)
-    clustering_ward.fit(signal_features)
     clustering_average = AgglomerativeClustering(linkage='average', n_clusters=no_cluster)
     clustering_average.fit(signal_features)
     clustering_complete = AgglomerativeClustering(linkage='complete', n_clusters=no_cluster)
     clustering_complete.fit(signal_features)
-    clustering_single = AgglomerativeClustering(linkage='single', n_clusters=no_cluster)
-    clustering_single.fit(signal_features)
 
-    # --- DBSCAN
-    db = DBSCAN(eps=8, min_samples=6).fit(signal_features)
-
-    # --- OPTICS
-    optics = OPTICS(min_samples=6, xi=.05, min_cluster_size=.1)
-    optics.fit(signal_features)
-
-    # --- Birch
-    brc = Birch(branching_factor=100, n_clusters=no_cluster, threshold=20, compute_labels=True)
-    brc.fit(signal_features)
-    return [kmeans, mini_kmeans, af, ms, labels_sc, clustering_ward, clustering_average, clustering_complete, clustering_single,
-            db, optics, brc]
+    return [clustering_average, clustering_complete]
 
 
 def componentes_principales(df_features, n):
@@ -135,7 +141,10 @@ def métricas(signal_features):
         cluster_mnbatch = MiniBatchKMeans(n_clusters=i, random_state=0, max_iter=10).fit(signal_features)
         df_mbatch.iloc[i - 2, :] = unidimensional_metrics(signal_features, cluster_mnbatch.labels_)
 
-        affinity = np.exp(-euclidean_distances(signal_features) / np.std(signal_features, axis=1))
+        desv = np.std(signal_features, axis=1)
+        if isinstance(desv, pd.Series):
+            desv = desv.values
+        affinity = np.exp(-euclidean_distances(signal_features) / desv)
         labels_sc = spectral_clustering(affinity, n_clusters=i, eigen_solver='arpack')
         df_affin.iloc[i - 2, :] = unidimensional_metrics(signal_features, labels_sc)
 
@@ -161,16 +170,23 @@ def métricas(signal_features):
 
     df = pd.concat([df_kmeans, df_mbatch, df_affin, df_ward, df_aver, df_comp, df_single, df_birch], axis=1, sort=False)
     df = df.reindex(sorted(df.columns), axis=1)
-    df.reindex(list(u))
+    df['N° Cluster'] = list(u)
+    df.set_index('N° Cluster', inplace=True)
     return df
 
 
 def unidimensional_metrics(signal, labels):
     l = pd.DataFrame(labels)
     if l.nunique()[0] > 1:
-        ss = sklearn.metrics.silhouette_score(signal, labels, metric='euclidean')
+        # Calinski Harabasz score (Variance Ratio Criterion):  [-inf , inf] == [Worst, Best]
         ch = sklearn.metrics.calinski_harabasz_score(signal, labels)
+
+        # Davies Bouldin score: [0, inf] == [Best, Worst]
         db = sklearn.metrics.davies_bouldin_score(signal, labels)
+
+        # Silhouette Score: [-1, 0 ,1] == [Worst, Overlapping, Best]
+        ss = sklearn.metrics.silhouette_score(signal, labels, metric='euclidean')
+
         return [ss, ch, db]
     else:
         return [np.nan, np.nan, np.nan]
