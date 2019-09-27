@@ -49,12 +49,10 @@ def clustering(signal_features, no_cluster=7):
     # brc.fit(signal_features)
 
     # --- Agglomerative Clustering - Solo métrica euclidiana
-    clustering_average = AgglomerativeClustering(linkage='average', n_clusters=no_cluster)
-    clustering_average.fit(signal_features)
     clustering_complete = AgglomerativeClustering(linkage='complete', n_clusters=no_cluster)
     clustering_complete.fit(signal_features)
 
-    return [clustering_average, clustering_complete]
+    return clustering_complete
 
 
 def componentes_principales(df_features, n):
@@ -119,8 +117,18 @@ def graficar_pca(matriz, labels, i):
     return
 
 
-def métricas(signal_features):
-    n = params.no_cluster
+def métricas(signal_features, transicion):
+
+    # Caso específico para transiciones
+    if transicion == 'cierre':
+        ii = 0
+    elif transicion == 'apertura':
+        ii = 1
+    else:
+        return print('Las variables aceptadas son: apertura o cierre')
+    # ------------------------------------
+
+    n = params.no_cluster[ii]
     u = range(2, n)
     size = len(u)
 
