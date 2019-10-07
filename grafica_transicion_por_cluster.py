@@ -30,6 +30,7 @@ def grafica(aperturas, labels_a, cierres, labels_c):
     axes.set_xlabel('Tiempo [s]', fontsize=10)
     axes.set_ylabel('Ángulo [°]', fontsize=10)
     axes.set_title('Aperturas')
+    axes.legend(loc="left right")
 
     # Gráfica conjunta de aperturas
     axes = f.add_subplot(122)
@@ -37,14 +38,20 @@ def grafica(aperturas, labels_a, cierres, labels_c):
     sns.despine(f, left=True, bottom=True)
 
     # cierres0 = []
+    custom_circle_close = [plt.Circle((0, 0), color=custom_palette[i]) for i in range(len(custom_palette))]
+
+    labels_c = np.insert(labels_c, 21, 3)
+    labels_c = np.insert(labels_c, 50, 3)
     for i in range(len(cierres)):
         nc = len(cierres[i])
         x = np.linspace(0, nc - 1, nc)
-        axes.scatter(x, cierres[i], alpha=0.3, color=custom_palette[labels_c[i]])
+        scatter = axes.scatter(x, cierres[i], alpha=0.3, color=custom_palette[labels_c[i]], label=custom_palette[labels_c[i]])
 
     axes.set_xlabel('Tiempo [$s$]', fontsize=10)
     axes.set_ylabel('Ángulo [$°$]', fontsize=10)
     axes.set_title('Cierres')
+
+    axes.legend(custom_circle_close, ['Falla', 'Bien', 'Falso positivo', 'Indeterminado'], loc="upper left", title="Clases", bbox_to_anchor=(1, 1))
 
     plt.show()
     return

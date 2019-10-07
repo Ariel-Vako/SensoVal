@@ -115,7 +115,27 @@ def get_sensoval_features(listado_transiente):
     return features
 
 
-def clean(dataframe):
+def clean_open(dataframe):
+    # Replace inf by NaN
+    dataframe.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+    # Eliminar columnas que contengan %NaN
+    dataframe.dropna(axis=1, inplace=True)
+
+    # Eliminate columns with one unique value
+    u = [c for c in dataframe.columns if dataframe[c].nunique() < 2]
+    dataframe.drop(u, axis=1)
+
+    # Eliminate columns with concentration over 75% (Risk Modeling)
+    # I dont gonna drop columns with concentrate bcz they have
+    # the anormality that I look for.
+
+    return dataframe
+
+
+def clean_close(dataframe):
+    # Eliminate Entropy == 0
+    dataframe.drop(dataframe[dataframe.Entropy == 0.0].index, inplace=True)
     # Replace inf by NaN
     dataframe.replace([np.inf, -np.inf], np.nan, inplace=True)
 
