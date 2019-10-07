@@ -1,8 +1,7 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.optimize import least_squares
-import pandas as pd
+from matplotlib.lines import Line2D
 
 
 def grafica(aperturas, labels_a, cierres, labels_c):
@@ -30,7 +29,9 @@ def grafica(aperturas, labels_a, cierres, labels_c):
     axes.set_xlabel('Tiempo [s]', fontsize=10)
     axes.set_ylabel('Ángulo [°]', fontsize=10)
     axes.set_title('Aperturas')
-    axes.legend(loc="left right")
+
+    custom_circle_close = [Line2D([0], [0], marker='o', color=custom_palette[i]) for i in (0, 1)]
+    axes.legend(custom_circle_close, ['Bien', 'Falla'], loc="upper right", title="Clases", bbox_to_anchor=(-0.1, 1))
 
     # Gráfica conjunta de aperturas
     axes = f.add_subplot(122)
@@ -38,7 +39,6 @@ def grafica(aperturas, labels_a, cierres, labels_c):
     sns.despine(f, left=True, bottom=True)
 
     # cierres0 = []
-    custom_circle_close = [plt.Circle((0, 0), color=custom_palette[i]) for i in range(len(custom_palette))]
 
     labels_c = np.insert(labels_c, 21, 3)
     labels_c = np.insert(labels_c, 50, 3)
@@ -51,6 +51,7 @@ def grafica(aperturas, labels_a, cierres, labels_c):
     axes.set_ylabel('Ángulo [$°$]', fontsize=10)
     axes.set_title('Cierres')
 
+    custom_circle_close = [Line2D([0], [0], marker='o', color=custom_palette[i]) for i in range(len(custom_palette))]
     axes.legend(custom_circle_close, ['Falla', 'Bien', 'Falso positivo', 'Indeterminado'], loc="upper left", title="Clases", bbox_to_anchor=(1, 1))
 
     plt.show()
