@@ -8,35 +8,36 @@ __version__ = "1.0"
 import sys, argparse, csv, os, MySQLdb, time
 from datetime import datetime, timedelta
 import struct
+import pandas as pd
+import numpy as np
 
-db = MySQLdb.connect(host='192.168.3.38', port=3306, user='root', passwd='hstech2018!', db='SVIA_MCL')
-# ("hstech.sinc.cl", "jsanhueza", "Hstech2018.-)", "ssi_mlp_sag2")
+db = MySQLdb.connect(host='192.168.3.38', port=3306, user='amardones', passwd='hstech2018', db='SVIA_MCL')
 cursor = db.cursor()
 
-query = "id_reg AS ID, time AS Timespam, id_sensor as Sensor, cast( data_sensor AS CHAR) as Data FROM svia_data WHERE id_sensor = 6 ORDER BY id_reg DESC LIMIT 1"
+query = "SELECT id_reg, time, cast( data_sensor AS CHAR) FROM svia_data WHERE id_sensor = 6 LIMIT 10"
 
 cursor.execute(query)
+db.close()
 results = cursor.fetchall()
-lista_y = []
-for row in results:
-    for x in range(540):
-        lista_y.append((ord(row[0][x * 2]) << 8) + ord(row[0][x * 2 + 1]) - 2 ** 15)
-    # turn = struct.unpack("540h",row[0])
-    print(lista_y)
-    exit()
+df = pd.DataFrame(list(results), columns=('id', 'fecha', 'blob'))
 
-cursor = db.cursor()
+cont = 0
+index = 0
+for ind, row in enumerate(results):
+    df_aux = pd.DataFrame(row[2].split('|'), columns=['data'])
+    df_aux = df_aux[: -1]
+    n = len(df_aux)
+    df = df.append(pd.DataFrame(np.nan, index=range(index, index + n), columns=df.columns))
+    index += n
+    # u = pd.date_range(row[0], results[ind + 1][0], periods=n + 1, closed='left')
+    # df.set_index(u, inplace=True)
+    for fila in df_aux['data']:
+        u = fila.split(',')
+        df.loc[cont, :] = u
+        cont += 1
 
-db = MySQLdb.connect("192.168.3.38", "root", "hstech2018", "ssi_mlp_sag2")
-cursor = db.cursor()
+df['x'] = pd.to_numeric(df.x)
+df['y'] = pd.to_numeric(df.y)
+df['z'] = pd.to_numeric(df.z)
 
-cursor.execute("SELECT id_reg, data_sensor , time \
-	FROM svia_data \
-	WHERE (id_sensor_data IN (1) AND estado_data = 134217727 \
-	AND (fecha_reg BETWEEN %s AND %s) ) \
-	ORDER BY fecha_reg ASC \
-	LIMIT 5000", (startDate, endDate))
-
-results = cursor.fetchall()
-feeding_ring = process(results)
-
+print('')
