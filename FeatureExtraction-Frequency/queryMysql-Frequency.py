@@ -1,5 +1,5 @@
 from __future__ import division
-import funciones as fx
+import funciones_freq as fx
 import sys, argparse, csv, os, MySQLdb, time
 from datetime import datetime, timedelta
 import struct
