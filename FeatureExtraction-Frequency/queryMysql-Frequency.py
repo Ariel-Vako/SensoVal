@@ -1,20 +1,14 @@
 from __future__ import division
-
-"""Consulta Archivos SVIA MQTT"""
-__author__ = "Ariel Mardones"
-__copyright__ = "Copyright 2019-05-07, highservice"
-__version__ = "1.0"
-
+import funciones as fx
 import sys, argparse, csv, os, MySQLdb, time
 from datetime import datetime, timedelta
 import struct
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import funciones as fx
 
 for i in [6, 8, 9]:
-    db = MySQLdb.connect(host='192.168.3.38', port=3306, user='amardones', passwd='hstech2018', db='SVIA_MCL')
+    db = MySQLdb.connect(host='192.168.3.53', port=3306, user='root', passwd='hstech2017', db='SVIA_MCL')
     cursor = db.cursor()
 
     query = "SELECT id_reg, time, cast( data_sensor AS CHAR) FROM svia_data WHERE id_sensor = '{}' LIMIT 10;".format(i)
