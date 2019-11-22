@@ -12,7 +12,7 @@ for i in [6, 8, 9]:
     db = MySQLdb.connect(host='192.168.3.53', port=3306, user='ariel', passwd='hstech2018', db='SVIA_MCL')
     cursor = db.cursor()
 
-    query = "SELECT id_reg, time, cast( data_sensor AS CHAR) FROM svia_data WHERE id_sensor = '{}' LIMIT 10;".format(i)
+    query = "SELECT id_reg, time, cast( data_sensor AS CHAR) FROM svia_data WHERE id_sensor = '{}' LIMIT 1;".format(i)
 
     cursor.execute(query)
     db.close()
@@ -39,11 +39,11 @@ for i in [6, 8, 9]:
         df2['z'] = pd.to_numeric(df2.z)
 
         # GRÁFICAS
-        ax = plt.gca()
-        df2.plot(kind='line', y='x', color='blue', ax=ax)
-        df2.plot(kind='line', y='y', color='red', ax=ax)
-        df2.plot(kind='line', y='z', color='green', ax=ax)
-        plt.show()
+        # ax = plt.gca()
+        # df2.plot(kind='line', y='x', color='blue', ax=ax)
+        # df2.plot(kind='line', y='y', color='red', ax=ax)
+        # df2.plot(kind='line', y='z', color='green', ax=ax)
+        # plt.show()
 
         # TRANSFORMAR A WAVELETTES
         features = []
@@ -59,6 +59,14 @@ for i in [6, 8, 9]:
         # TODO: INGENIERÍA DE CARACTERÍSTICAS'
 
         # TODO: GUARDAR EN NUEVA BASE DE DATOS LAS CARACTERÍSTICAS'
+        db = MySQLdb.connect(host='192.168.3.53', port=3306, user='ariel', passwd='hstech2018', db='SVIA_MCL')
+        cursor = db.cursor()
+
+        query = "INSERT INTO features (fecha, valv, eje, var, valor) VALUES (%s,%s,%s,%s,%s);"
+        valores = []
+        cursor.executemany(query, valores)
+
+        db.commit()
 
         # TODO: GUARDAR COORDENADAS EN BD EN SERVIDOR SEGÚN ID
 print('')
