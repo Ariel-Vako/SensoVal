@@ -1,5 +1,6 @@
 from __future__ import division
 import funciones_freq as fx
+import params_freq
 import sys, argparse, csv, os, MySQLdb, time
 from datetime import datetime, timedelta
 import struct
@@ -8,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 for i in [6, 8, 9]:
-    db = MySQLdb.connect(host='192.168.3.53', port=3306, user='root', passwd='hstech2017', db='SVIA_MCL')
+    db = MySQLdb.connect(host='192.168.3.53', port=3306, user='ariel', passwd='hstech2018', db='SVIA_MCL')
     cursor = db.cursor()
 
     query = "SELECT id_reg, time, cast( data_sensor AS CHAR) FROM svia_data WHERE id_sensor = '{}' LIMIT 10;".format(i)
@@ -37,21 +38,27 @@ for i in [6, 8, 9]:
         df2['y'] = pd.to_numeric(df2.y)
         df2['z'] = pd.to_numeric(df2.z)
 
+        # GRÁFICAS
         ax = plt.gca()
         df2.plot(kind='line', y='x', color='blue', ax=ax)
         df2.plot(kind='line', y='y', color='red', ax=ax)
         df2.plot(kind='line', y='z', color='green', ax=ax)
         plt.show()
+
+        # TRANSFORMAR A WAVELETTES
+        features = []
+        for u in ['x', 'y', 'z']:
+            signal = list(df2[u])
+            rec, list_coeff = fx.lowpassfilter(signal, params_freq.thresh, params_freq.wavelet_name)
+
+            # EXTRACCIÓN DE CARACTERÍSTICAS POR BANDA DE FRECUENCIA
+            for coeff in list_coeff:
+                features += fx.get_features(coeff)
+
         print('')
+        # TODO: INGENIERÍA DE CARACTERÍSTICAS'
 
-    'TODO: GUARDAR COORDENADAS EN BD EN SERVIDOR SEGÚN ID'
+        # TODO: GUARDAR EN NUEVA BASE DE DATOS LAS CARACTERÍSTICAS'
 
-    'TODO: TRANSFORMAR A WAVELETTES'
-
-    'TODO: EXTRACCIÓN DE CARACTERÍSTICAS'
-
-    'TODO: INGENIERÍA DE CARACTERÍSTICAS'
-
-    'TODO: GUARDAR EN NUEVA BASE DE DATOS LAS CARACTERÍSTICAS'
-
+        # TODO: GUARDAR COORDENADAS EN BD EN SERVIDOR SEGÚN ID
 print('')
