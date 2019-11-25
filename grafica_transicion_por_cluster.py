@@ -17,9 +17,9 @@ def grafica(aperturas, labels_a, cierres, labels_c):
     # Formato de aperturas
     # Eliminar transiciones incompletas
     # aperturas0 = []
-    # for i in range(len(aperturas)):
-    #     if all(item < -10 for item in aperturas[i][0:4]):
-    #         aperturas0.append(aperturas[i])
+    # for valv in range(len(aperturas)):
+    #     if all(item < -10 for item in aperturas[valv][0:4]):
+    #         aperturas0.append(aperturas[valv])
 
     for i in range(len(aperturas)):
         na = len(aperturas[i])

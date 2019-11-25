@@ -97,11 +97,9 @@ def get_sensosag_features(ecg_data, ecg_labels, waveletname):
 def artificials_variables(features):
     col_names = ['Entropy', 'Amount zero crossing', 'Amount mean crossing', 'n5', 'n25', 'n75', 'n95', 'median', 'mean', 'std', 'var', 'rms']
     n = len(col_names)
-    m = len(features)
-    original_features = pd.DataFrame(features, columns=col_names)
+    m = 1
+    original_features = pd.DataFrame([features], columns=col_names)
     poly2 = pd.DataFrame(data=np.full([m, n * (n - 1) // 2], np.nan))
-    ratios_upper = pd.DataFrame(data=np.full([m, n * (n - 1) // 2], np.nan))
-    ratios_lower = pd.DataFrame(data=np.full([m, n * (n - 1) // 2], np.nan))
 
     # poly2
     cont = 0
@@ -111,26 +109,6 @@ def artificials_variables(features):
             name = col_names[i] + operation + col_names[j]
             poly2.rename(columns={cont: name}, inplace=True)
             poly2[name] = original_features[col_names[i]] * original_features[col_names[j]]
-            cont += 1
-
-    # ratio upper
-    cont = 0
-    for i in range(n):
-        for j in range(i + 1, n):
-            operation = ' / '
-            name = col_names[i] + operation + col_names[j]
-            ratios_upper.rename(columns={cont: name}, inplace=True)
-            ratios_upper[name] = original_features[col_names[i]] / original_features[col_names[j]]
-            cont += 1
-
-    # ratio lower
-    cont = 0
-    for i in range(n):
-        for j in range(i + 1, n):
-            operation = ' / '
-            name = col_names[j] + operation + col_names[i]
-            ratios_lower.rename(columns={cont: name}, inplace=True)
-            ratios_lower[name] = original_features[col_names[j]] / original_features[col_names[i]]
             cont += 1
 
     # Squares
@@ -143,20 +121,10 @@ def artificials_variables(features):
     roots = original_features.apply(lambda x: np.sqrt(x))
     roots.rename(columns=dict(zip(col_names, col_rt)), inplace=True)
 
-    # Natural logarithm
-    col_ln = ['ln(' + cn + ')' for cn in col_names]
-    ln = original_features.apply(lambda x: np.log(x))
-    ln.rename(columns=dict(zip(col_names, col_ln)), inplace=True)
-
     # Exponential
     col_exp = ['exp(' + cn + ')' for cn in col_names]
     exp = original_features.apply(lambda x: np.exp(x / 10e3))
     exp.rename(columns=dict(zip(col_names, col_exp)), inplace=True)
 
-    # Inverse
-    col_inv = [cn + 'E-1' for cn in col_names]
-    inv = original_features.apply(lambda x: 1 / x)
-    inv.rename(columns=dict(zip(col_names, col_inv)), inplace=True)
-
-    df = pd.concat([original_features, poly2, ratios_upper, ratios_lower, squares, roots, exp, inv], axis=1, sort=False)
+    df = pd.concat([original_features, poly2, squares, roots, exp], axis=1, sort=False)
     return df

@@ -135,7 +135,7 @@ for row in range(len(sectores_con_transiente)):
                 df_transiente = last_query(datetime.strptime(key.split('+')[0], '%Y-%m-%d %H:%M:%S'), valvula)
             #grf.gráfica_transición(list(df_transiente['fecha']), df_transiente['Angulo'].values, valvula, "pre-formateo")
             i, f = ifx.ventana(df_transiente['Angulo'].values, value)
-            #grf.gráfica_transición(list(df_transiente['fecha'].iloc[i:f]), df_transiente['Angulo'].iloc[i:f].values, valvula)
+            #grf.gráfica_transición(list(df_transiente['fecha'].iloc[valv:f]), df_transiente['Angulo'].iloc[valv:f].values, valvula)
             if value == 0:
                 cierres.append(df_transiente['Angulo'].iloc[i:f].values)
             else:
