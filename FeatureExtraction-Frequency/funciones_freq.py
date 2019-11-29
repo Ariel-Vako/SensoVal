@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 def lowpassfilter(signal, thresh=0.63, wavelet="sym7"):
     thresh = thresh * np.nanmax(signal)
     coeff = pywt.wavedec(signal, wavelet, mode="per", level=2)
-    coeff[1:] = (pywt.threshold(i, value=thresh, mode="soft") for i in coeff[1:])
+    # coeff[1:] = (pywt.threshold(i, value=thresh, mode="soft") for i in coeff[1:])
     reconstructed_signal = pywt.waverec(coeff, wavelet, mode="per")
     return reconstructed_signal, coeff
 
@@ -116,15 +116,10 @@ def artificials_variables(features):
     squares = original_features.apply(lambda x: x * x)
     squares.rename(columns=dict(zip(col_names, col_sq)), inplace=True)
 
-    # Squares roots
-    col_rt = ['sqrt(' + cn + ')' for cn in col_names]
-    roots = original_features.apply(lambda x: np.sqrt(x))
-    roots.rename(columns=dict(zip(col_names, col_rt)), inplace=True)
-
     # Exponential
     col_exp = ['exp(' + cn + ')' for cn in col_names]
     exp = original_features.apply(lambda x: np.exp(x / 10e3))
     exp.rename(columns=dict(zip(col_names, col_exp)), inplace=True)
 
-    df = pd.concat([original_features, poly2, squares, roots, exp], axis=1, sort=False)
+    df = pd.concat([original_features, poly2, squares, exp], axis=1, sort=False)
     return df
