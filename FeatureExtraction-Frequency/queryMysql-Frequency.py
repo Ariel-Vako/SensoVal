@@ -4,11 +4,12 @@ import params_freq
 import MySQLdb
 import pandas as pd
 import numpy as np
+from multiprocessing import Process
 
 
-id_reg = 0
-last_index = {6: '14834701', 8: '15317765', 9: '14834717'}
-for valv in [6, 8, 9]:
+def query_x_val(valv):
+    id_reg = 0
+    last_index = {6: '14834701', 8: '15317765', 9: '14834717'}
     flag = False
     while not flag:
         db = MySQLdb.connect(host='192.168.3.53', port=3306, user='ariel', passwd='hstech2018', db='SVIA_MCL')
@@ -28,6 +29,7 @@ for valv in [6, 8, 9]:
         results = cursor.fetchall()
         df = pd.DataFrame(list(results), columns=('id', 'fecha', 'blob'))
         id_reg = df['id'].values[0]
+        print(id_reg)
 
         # SEPARAR BLOB POR COORDENADAS
         df_aux = pd.DataFrame(results[0][2].split('|'), columns=['data'])
@@ -75,4 +77,15 @@ for valv in [6, 8, 9]:
                 cursor.executemany(query, valores)
                 db.commit()
 
-print('')
+
+if __name__ == '__main__':
+
+    processes = []
+    for valvula in [6, 8, 9]:
+        processes.append(Process(target=query_x_val, args=(valvula,)))
+
+    for process in processes:
+        process.start()
+
+    for process in processes:
+        process.join()
