@@ -29,7 +29,7 @@ def query_x_val(valv):
         results = cursor.fetchall()
         df = pd.DataFrame(list(results), columns=('id', 'fecha', 'blob'))
         id_reg = df['id'].values[0]
-        print(id_reg)
+        print(f'Válvula: {valv}, Id: {id_reg}')
 
         # SEPARAR BLOB POR COORDENADAS
         df_aux = pd.DataFrame(results[0][2].split('|'), columns=['data'])
