@@ -5,22 +5,22 @@ import MySQLdb
 import pandas as pd
 import numpy as np
 from multiprocessing import Process
+import sys
 
 
-def query_x_val(valv):
+def query_x_val(valv, first_index):
     id_reg = 0
-    last_index = {6: '14834701', 8: '15317765', 9: '14834717'}
+    last_index = int(first_index) + 3000000  # {6: '14834701', 8: '15317765', 9: '14834717'}
     flag = False
     while not flag:
         db = MySQLdb.connect(host='192.168.3.53', port=3306, user='ariel', passwd='hstech2018', db='SVIA_MCL')
         cursor = db.cursor()
         if id_reg == 0:
-            query = "SELECT id_reg, time, cast( data_sensor AS CHAR) FROM svia_data WHERE id_sensor = '{}' AND time > '2018-07-15' LIMIT 1;".format(valv)
+            query = "SELECT id_reg, time, cast( data_sensor AS CHAR) FROM svia_data WHERE id_sensor = '{}' AND time > '2018-07-15' AND id_reg>='{}' LIMIT 1;".format(valv, first_index)
         else:
-            if not id_reg == int(last_index[valv]):
+            if not id_reg == last_index:
                 query = "SELECT id_reg, time, cast( data_sensor AS CHAR) FROM svia_data WHERE id_sensor = '{}' AND id_reg > '{}' LIMIT 1;".format(valv, id_reg)
             else:
-                flag = True
                 db.close()
                 break
 
@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     processes = []
     for valvula in [6, 8, 9]:
-        processes.append(Process(target=query_x_val, args=(valvula,)))
+        processes.append(Process(target=query_x_val, args=(valvula, sys.argv[1])))
 
     for process in processes:
         process.start()
