@@ -8,9 +8,6 @@ from multiprocessing import Process
 import sys
 
 
-# SCRIPT QUE TRANSFORMA LA BASE DE DATOS EN EL ESPACIO DE CARACTERÍSTICAS.
-# SE DETIENE SU EJECUCIÓN DADO LA MAGNITUD EN TIEMPO QUE DEMORA (22 DÍAS DE PROCESAMIENTO).
-# SE OPTA POR GENERAR UNA TABLA CON ENERGÍAS POR BANDAS DE FRECUENCIA.
 def query_x_val(valv, first_index):
     id_reg = 0
     last_index = int(first_index) + 3000000  # {6: '14834701', 8: '15317765', 9: '14834717'}
