@@ -125,5 +125,8 @@ def artificials_variables(features):
 def energy(features):
     energia =[]
     for ft in features:
-        energia + = calcular nergia
+        energia += energia_x_nivel(ft, len(ft))
     return energia
+
+def energia_x_nivel(coeffs, k):
+    return np.sqrt(np.sum(np.array(coeffs[-k]) ** 2)) / len(coeffs[-k])
