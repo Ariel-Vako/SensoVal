@@ -120,3 +120,10 @@ def artificials_variables(features):
 
     df = pd.concat([original_features, poly2, squares, exp], axis=1, sort=False)
     return df
+
+
+def energy(features):
+    energia =[]
+    for ft in features:
+        energia + = calcular nergia
+    return energia
