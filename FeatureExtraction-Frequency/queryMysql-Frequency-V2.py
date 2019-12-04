@@ -10,7 +10,7 @@ import sys
 
 def query_x_val(valv, first_index):
     id_reg = 0
-    last_index = int(first_index) + 3000000
+    last_index = int(first_index) + 300
     flag = False
     db = MySQLdb.connect(host='192.168.3.53', port=3306, user='ariel', passwd='hstech2018', db='SVIA_MCL')
     cursor = db.cursor()
@@ -51,22 +51,21 @@ def query_x_val(valv, first_index):
         ñ = ['x', 'y', 'z']
         for u in ñ:
             signal = list(df2[u])
-            rec, list_coeff = fx.lowpassfilter(signal, params_freq.thresh, params_freq.wavelet_name)
+            rec, list_coeff, l = fx.lowpassfilter(signal, params_freq.thresh, params_freq.wavelet_name)
 
             # ENERGÍA POR BANDA DE FRECUENCIA
-            for in_freq, coeff in enumerate(list_coeff):
-                features = fx.get_features(coeff)
-                energia = fx.energy(features)
+            energia_aprox, energia_det = fx.wenergy(list_coeff, l)
+            # energia_porcentual = [100*(energia_aprox-ed)/energia_aprox for ed in energia_det]
 
-                # GUARDAR EN NUEVA BASE DE DATOS LAS CARACTERÍSTICAS
-                query = "INSERT INTO Energy_by_band (fecha, valvula, eje, banda_freq, energia) VALUES (%s,%s,%s,%s,%s);"
-                valores = []
-                fecha = pd.to_datetime(str(df['fecha'].values[0]))
-                dt = fecha.strftime('%Y-%m-%d %H:%M:%S')
-                for vl in energia:
-                    valores.append((dt, valv, ñ.index(u), in_freq, vl))
-                cursor.executemany(query, valores)
-                db.commit()
+            # GUARDAR EN NUEVA BASE DE DATOS LAS CARACTERÍSTICAS
+            query = "INSERT INTO Energy_by_band (fecha, valvula, eje, banda_freq, energia) VALUES (%s,%s,%s,%s,%s);"
+            valores = []
+            fecha = pd.to_datetime(str(df['fecha'].values[0]))
+            dt = fecha.strftime('%Y-%m-%d %H:%M:%S')
+            for ii, vl in enumerate(energia_det):
+                valores.append((dt, valv, ñ.index(u), ii, vl))
+            cursor.executemany(query, valores)
+            db.commit()
     db.close()
 
 

@@ -14,10 +14,26 @@ import matplotlib.pyplot as plt
 
 def lowpassfilter(signal, thresh=0.63, wavelet="sym7"):
     thresh = thresh * np.nanmax(signal)
-    coeff = pywt.wavedec(signal, wavelet, mode="per", level=2)
+    coeff = pywt.wavedec(signal, wavelet, mode="per")
     # coeff[1:] = (pywt.threshold(i, value=thresh, mode="soft") for i in coeff[1:])
     reconstructed_signal = pywt.waverec(coeff, wavelet, mode="per")
-    return reconstructed_signal, coeff
+    # Parámetro de entrada para calcular la energía por banda
+    # Largo de vector por coeficiente
+    l = [len(x) for x in coeff]
+    l.append(len(signal))
+    return reconstructed_signal, coeff, l
+
+
+def wenergy(coeffs, l):
+    # http://www.codeforge.com/read/200483/wenergy.m__html
+    et = sum([sum(np.power(coeffs[k], 2)) for k in range(len(l) - 1)])
+    level = len(l) - 2
+    ca = coeffs[0]
+    ea = 100 * sum(np.power(ca, 2)) / et
+    ed = np.zeros(level - 1)
+    for k in range(level - 1):
+        ed[k] = 100 * sum(np.power(coeffs[k + 1], 2)) / et
+    return ea, ed
 
 
 def grafica(signal, ciclo, reconstructed_signal, dates):
@@ -120,13 +136,3 @@ def artificials_variables(features):
 
     df = pd.concat([original_features, poly2, squares, exp], axis=1, sort=False)
     return df
-
-
-def energy(features):
-    energia =[]
-    for ft in features:
-        energia += energia_x_nivel(ft, len(ft))
-    return energia
-
-def energia_x_nivel(coeffs, k):
-    return np.sqrt(np.sum(np.array(coeffs[-k]) ** 2)) / len(coeffs[-k])
