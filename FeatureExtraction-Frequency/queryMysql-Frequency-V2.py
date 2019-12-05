@@ -10,7 +10,7 @@ import sys
 
 def query_x_val(valv, first_index):
     id_reg = 0
-    last_index = int(first_index) + 300
+    last_index = int(first_index) + 5000000
     flag = False
     db = MySQLdb.connect(host='192.168.3.53', port=3306, user='ariel', passwd='hstech2018', db='SVIA_MCL')
     cursor = db.cursor()
