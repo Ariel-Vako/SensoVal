@@ -6,22 +6,23 @@ import scipy.stats
 import collections
 import datetime
 import matplotlib
+import matplotlib.pyplot as plt
 import pandas as pd
 
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 
 
 def lowpassfilter(signal, thresh=0.63, wavelet="sym7"):
     thresh = thresh * np.nanmax(signal)
-    coeff = pywt.wavedec(signal, wavelet, mode="per")
+    coeff = pywt.wavedec(signal, wavelet, mode="per", level=10)
     # coeff[1:] = (pywt.threshold(i, value=thresh, mode="soft") for i in coeff[1:])
-    reconstructed_signal = pywt.waverec(coeff, wavelet, mode="per")
+    # reconstructed_signal = pywt.waverec(coeff, wavelet, mode="per")
+
     # Parámetro de entrada para calcular la energía por banda
     # Largo de vector por coeficiente
     l = [len(x) for x in coeff]
     l.append(len(signal))
-    return reconstructed_signal, coeff, l
+    return coeff, l  # reconstructed_signal, coeff, l
 
 
 def wenergy(coeffs, l):
