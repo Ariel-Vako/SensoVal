@@ -13,7 +13,7 @@ matplotlib.use('Agg')
 
 
 def lowpassfilter(signal, thresh=0.63, wavelet="sym7"):
-    thresh = thresh * np.nanmax(signal)
+    # thresh = thresh * np.nanmax(signal)
     coeff = pywt.wavedec(signal, wavelet, mode="per", level=10)
     # coeff[1:] = (pywt.threshold(i, value=thresh, mode="soft") for i in coeff[1:])
     # reconstructed_signal = pywt.waverec(coeff, wavelet, mode="per")

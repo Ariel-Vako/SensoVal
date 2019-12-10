@@ -8,17 +8,27 @@ import numpy as np
 matplotlib.use('Agg')
 
 
-def grafica(dates, eje_x, eje_y, eje_z):
-    fechas = datetime.datetime.strftime(dates, '%d-%m ~ %H:%M:%S')
+def grafica(eje_x, eje_y, eje_z):
     plt.close('all')
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True, figsize=(12, 8))
     plt.gcf().canvas.set_window_title('Energía por nivel')
 
-    y = np.arange(7)
+    # Eje x
+    fecha_x = [datetime.datetime.strftime(date, '%d-%m ~ %H:%M:%S') for date in list(eje_x['fecha'])]
+
+    n = int(eje_x['banda frecuencia'].max())
+    cx = np.zeros((n + 1, len(fecha_x)))
+    fechas_unicas_x = eje_x['fecha'].unique()
+    for index_x, f in enumerate(fechas_unicas_x):
+        largo_nivel = len(eje_x[eje_x['fecha'] == f])
+        filtrado = 1000 * eje_x[eje_x['fecha'] == f].loc[:, 'energia'].values
+        for nivel in range(largo_nivel):
+            cx[nivel, index_x] = filtrado[nivel]
+
     ax1.set_title('Energía: Eje x')
-    p1 = ax1.pcolormesh(fechas, y, cmap="magma")
+    p1 = ax1.pcolormesh(fecha_x, cx, cmap="magma")
     fig.colorbar(p1, ax=ax1)
-    plt.xticks(c, fechas, rotation='vertical')
+    plt.xticks(np.arange(0, n + 1), fecha_x, cx, rotation='vertical')
     # ax2.plot(rec, 'k', label='DWT smoothing', linewidth=2)
     # ax2.legend()
     # ax2.set_title(f'Cicle {ciclo + 1}: {fecha}', fontsize=18)
@@ -41,13 +51,11 @@ db.close()
 df = pd.DataFrame(list(results), columns=('fecha', 'eje', 'banda frecuencia', 'energia'))
 grouped_eje = df.groupby('eje')
 ejex = grouped_eje.get_group(0)
-fechas = list(ejex['fecha'])
-ejex.drop(columns=['fecha', 'eje'], inplace=True)
 
 ejey = grouped_eje.get_group(1)
-ejey.drop(columns=['fecha', 'eje'], inplace=True)
 
 ejez = grouped_eje.get_group(2)
-ejez.drop(columns=['fecha', 'eje'], inplace=True)
+
+grafica(ejex, ejey, ejez)
 
 print('')
