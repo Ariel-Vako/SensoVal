@@ -93,8 +93,8 @@ def last_query(date, valvula):
     return df
 
 
-valvula = 6  # TODO: VALVULA
-ruta = f'/media/arielmardones/HS/SensoVal/Datos/val{valvula}/'
+valvula = 6  # VALVULA
+ruta = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvula}/'
 query_bckup = ruta + f'query_influx_sensoVal{valvula}.txt'
 
 with open(query_bckup, 'rb') as rf:
@@ -123,6 +123,9 @@ sectores_con_transiente = segmentación.loc[segmentación['diferencia'] > interv
 
 aperturas = []
 cierres = []
+
+cierres_fechas =[]
+aperturas_fechas =[]
 for row in range(len(sectores_con_transiente)):
     print(f'[{datetime.now()}] Fila: {row}')
     entorno_cero = query_zeros(sectores_con_transiente['inicio'].iloc[row], sectores_con_transiente['fin'].iloc[row], valvula)
@@ -136,17 +139,32 @@ for row in range(len(sectores_con_transiente)):
             #grf.gráfica_transición(list(df_transiente['fecha']), df_transiente['Angulo'].values, valvula, "pre-formateo")
             i, f = ifx.ventana(df_transiente['Angulo'].values, value)
             #grf.gráfica_transición(list(df_transiente['fecha'].iloc[valv:f]), df_transiente['Angulo'].iloc[valv:f].values, valvula)
-            if value == 0:
-                cierres.append(df_transiente['Angulo'].iloc[i:f].values)
-            else:
-                aperturas.append(df_transiente['Angulo'].iloc[i:f].values)
+            if i<f:
+                if value == 0:
+                    print(f'Cierre: (i, f): {i, f}')
+                    cierres.append(df_transiente['Angulo'].iloc[i:f].values)
+                    cierres_fechas.append([df_transiente['fecha'].iloc[i], df_transiente['fecha'].iloc[f]])
+                else:
+                    print(f'Apertura: (i, f): {i, f}')
+                    aperturas.append(df_transiente['Angulo'].iloc[i:f].values)
+                    aperturas_fechas.append([df_transiente['fecha'].iloc[i], df_transiente['fecha'].iloc[f]])
+            print(f'Key: {key}')
 
-ruta = f'/media/arielmardones/HS/SensoVal/Datos/val{valvula}/'
-file_apertura = ruta + f'Aperturas_val{valvula}'
-file_cierre = ruta + f'Cierres_val{valvula}'
+# file_apertura = ruta + f'Aperturas_val{valvula}'
+# file_cierre = ruta + f'Cierres_val{valvula}'
+#
+# file_fecha_apertura = ruta + f'Fechas_aperturas_val{valvula}'
+# file_fecha_cierre = ruta + f'Fechas_cierres_val{valvula}'
+#
+# with open(file_apertura, 'wb') as fl:
+#     pickle.dump(aperturas,fl)
+#
+# with open(file_cierre, 'wb') as fl2:
+#     pickle.dump(cierres, fl2)
+#
+# with open(file_fecha_apertura, 'wb') as fl3:
+#     pickle.dump(aperturas_fechas,fl3)
+#
+# with open(file_fecha_cierre, 'wb') as fl4:
+#     pickle.dump(cierres_fechas, fl4)
 
-with open(file_apertura, 'wb') as fl:
-    pickle.dump(aperturas,fl)
-
-with open(file_cierre, 'wb') as fl2:
-    pickle.dump(cierres, fl2)
