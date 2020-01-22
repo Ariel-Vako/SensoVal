@@ -1,11 +1,5 @@
-import pandas as pd
 import pickle
-import numpy as np
-from influxdb import InfluxDBClient
-import maya
-import grafica as grf
-from datetime import timedelta, datetime
-import influxQuery as ifx
+import mysqlQuery_rf as rf
 from pandas.plotting import register_matplotlib_converters
 
 register_matplotlib_converters()
@@ -21,3 +15,8 @@ with open(file_fecha_apertura, 'rb') as rf1:
 
 with open(file_fecha_cierre, 'rb') as rf2:
     df_fechas_cierre = pickle.load(rf2)
+
+fecha_fin_apertura = df_fechas_aperturas[25][0]
+df = rf.query_mysql(fecha_fin_apertura)
+
+print('')
