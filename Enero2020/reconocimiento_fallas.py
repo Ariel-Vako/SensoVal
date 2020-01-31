@@ -1,6 +1,7 @@
 import pickle
-import mysqlQuery_rf as rf
 from pandas.plotting import register_matplotlib_converters
+
+from Enero2020 import mysqlQuery_rf
 
 register_matplotlib_converters()
 
@@ -16,7 +17,12 @@ with open(file_fecha_apertura, 'rb') as rf1:
 with open(file_fecha_cierre, 'rb') as rf2:
     df_fechas_cierre = pickle.load(rf2)
 
-fecha_fin_apertura = df_fechas_aperturas[25][0]
-df = rf.query_mysql(fecha_fin_apertura)
+minutos_antes =5
+for cierre in df_fechas_cierre:
+    # Extracción de datos antes del cierre
+    df = mysqlQuery_rf.query_mysql(cierre[0], minutos_antes)
+    # Transformación de las señales x, y, z en frecuencia sobre bandas de frecuencia
+    # Caracterización de las señales en frecuencia por banda y eje
+    # Guardado en base de datos
 
 print('')
