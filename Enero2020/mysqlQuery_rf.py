@@ -7,9 +7,9 @@ import pandas as pd
 def query_mysql(fecha_fin, minutos_antes):
     fecha_inicio = fecha_fin - timedelta(minutes=minutos_antes)
 
-    db = MySQLdb.connect(host='192.168.3.38',
+    db = MySQLdb.connect(host='192.168.3.53',
                          port=3306,
-                         user="amardones",
+                         user="ariel",
                          password="hstech2018",
                          db="SVIA_MCL")
     cursor = db.cursor()
@@ -43,7 +43,7 @@ def query_mysql(fecha_fin, minutos_antes):
     df['y'] = pd.to_numeric(df.y)
     df['z'] = pd.to_numeric(df.z)
 
-    return df
+    return df, fecha_inicio
 
 
 if __name__ == '__main__':
