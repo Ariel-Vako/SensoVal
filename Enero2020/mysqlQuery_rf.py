@@ -1,7 +1,8 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 import MySQLdb
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 def query_mysql(fecha_fin, minutos_antes):
@@ -47,5 +48,8 @@ def query_mysql(fecha_fin, minutos_antes):
 
 
 if __name__ == '__main__':
-    df = query_mysql()
+    df, f = query_mysql(datetime.strptime('2019-01-02T03:18:50', '%Y-%m-%dT%H:%M:%S'), 5)
+    plt.scatter(df.index.values, df['z'].values, alpha=0.2)
+    # df.plot.scatter(x='x', y=np.arange(len(df)), title=f'{f}')
+    plt.show(block=True)
     print()
