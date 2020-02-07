@@ -3,43 +3,32 @@ import MySQLdb
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import urllib3
 
 
 def query_mysql(fecha_fin, minutos_antes):
     fecha_inicio = fecha_fin - timedelta(minutes=minutos_antes)
 
-    db = MySQLdb.connect(host='192.168.3.53',
-                         port=3306,
-                         user="ariel",
-                         password="hstech2018",
-                         db="SVIA_MCL")
-    cursor = db.cursor()
+    http = urllib3.PoolManager()
+    if minutos_antes>0:
+        url = "http://innotech.selfip.com:8282/consulta_ssvv.php?ini='{}'&fin='{}'&id=6".format(fecha_inicio, fecha_fin)
+    else:
+        url = "http://innotech.selfip.com:8282/consulta_ssvv.php?ini='{}'&fin='{}'&id=6".format(fecha_fin, fecha_inicio )
+    r = http.request('GET', url)
+    resultado = list(str(r.data).split("<br>"))[:-2]
 
-    # consulta = "SELECT id_reg AS ID, time AS Timespam, id_sensor as Sensor, cast( data_sensor AS CHAR) as Data FROM svia_data WHERE id_sensor = 6 ORDER BY id_reg ASC LIMIT 10;"
-    consulta = "SELECT time AS Timespam, cast( data_sensor AS CHAR) FROM svia_data WHERE id_sensor = 6 AND time  >= '{}' AND time<= '{}';".format(fecha_inicio, fecha_fin)
-    cursor.execute(consulta)
+    print('Consulta realizada')
+    for i in np.arange(len(resultado), 0, -1):
+        if 'r' in resultado[i - 1]:
+            del (resultado[i - 1])
 
-    db.close()
-    results = cursor.fetchall()
+    lista = [None] * len(resultado)
 
-    cont = 0
-    index = 0
-    df = pd.DataFrame(columns=('x', 'y', 'z'))
-    # u = pd.Series()
-    for ind, row in enumerate(results):
-        df_aux = pd.DataFrame(row[1].split('|'), columns=['data'])
-        df_aux = df_aux[: -1]
-        n = len(df_aux)
-        df = pd.concat([df, pd.DataFrame(np.nan, index=range(index, index + n), columns=df.columns)], ignore_index=True)
-        print(f'index: {ind}')
-        index += n
-        # u = pd.date_range(row[0], results[ind + 1][0], periods=n + 1, closed='left')
-        # df.set_index(u, inplace=True)
-        for fila in df_aux['data']:
-            u = fila.split(',')
-            df.loc[cont, :] = u
-            cont += 1
+    for i, row in enumerate(resultado):
+        u = row.split(',')
+        lista[i] = u[1:]
 
+    df = pd.DataFrame(lista, columns=['x', 'y', 'z'])
     df['x'] = pd.to_numeric(df.x)
     df['y'] = pd.to_numeric(df.y)
     df['z'] = pd.to_numeric(df.z)
@@ -47,9 +36,36 @@ def query_mysql(fecha_fin, minutos_antes):
     return df, fecha_inicio
 
 
+def busqueda_back(path):
+    fecha_i = datetime.strptime('2019-01-03T18:10:00', '%Y-%m-%dT%H:%M:%S')
+
+    for i in np.arange(20):
+        df, f = query_mysql(fecha_i, 1)
+        fecha_i = f
+        plt.scatter(df.index.values, df['x'].values, alpha=0.2)
+        plt.savefig(f'{path}/Backward-{fecha_i}.png', dpi=500)
+        plt.close()
+    return
+
+
+def busqueda_for(path):
+    fecha_i = datetime.strptime('2019-01-03T18:10:00', '%Y-%m-%dT%H:%M:%S')
+
+    for i in np.arange(20):
+        df, f = query_mysql(fecha_i, -1)
+        fecha_i = f
+        plt.scatter(df.index.values, df['x'].values, alpha=0.2)
+        plt.savefig(f'{path}/Forward-{fecha_i}.png', dpi=500)
+        plt.close()
+
+    return
+
+
 if __name__ == '__main__':
-    df, f = query_mysql(datetime.strptime('2019-01-02T03:18:50', '%Y-%m-%dT%H:%M:%S'), 5)
-    plt.scatter(df.index.values, df['z'].values, alpha=0.2)
-    # df.plot.scatter(x='x', y=np.arange(len(df)), title=f'{f}')
-    plt.show(block=True)
-    print()
+    # Cada 3 minutos
+    ruta = '/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/delay_mysql/val6'
+    # Cada un minuto
+    # path = '/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/delay_mysql/val6/minutes_backward'
+    busqueda_back(ruta)
+    busqueda_for(ruta)
+
