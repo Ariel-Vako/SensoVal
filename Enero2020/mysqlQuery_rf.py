@@ -8,16 +8,15 @@ import urllib3
 
 def query_mysql(fecha_fin, minutos_antes):
     fecha_inicio = fecha_fin - timedelta(minutes=minutos_antes)
-
+    print(f'{fecha_inicio} & {fecha_fin}')
     http = urllib3.PoolManager()
-    if minutos_antes>0:
+    if minutos_antes > 0:
         url = "http://innotech.selfip.com:8282/consulta_ssvv.php?ini='{}'&fin='{}'&id=6".format(fecha_inicio, fecha_fin)
     else:
-        url = "http://innotech.selfip.com:8282/consulta_ssvv.php?ini='{}'&fin='{}'&id=6".format(fecha_fin, fecha_inicio )
+        url = "http://innotech.selfip.com:8282/consulta_ssvv.php?ini='{}'&fin='{}'&id=6".format(fecha_fin, fecha_inicio)
     r = http.request('GET', url)
     resultado = list(str(r.data).split("<br>"))[:-2]
 
-    print('Consulta realizada')
     for i in np.arange(len(resultado), 0, -1):
         if 'r' in resultado[i - 1]:
             del (resultado[i - 1])
@@ -68,4 +67,3 @@ if __name__ == '__main__':
     # path = '/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/delay_mysql/val6/minutes_backward'
     busqueda_back(ruta)
     busqueda_for(ruta)
-
