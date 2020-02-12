@@ -11,7 +11,7 @@ register_matplotlib_converters()
 
 def grafica_freq(señal, fecha, eje):
     n = len(señal)
-    time = np.arange(0, n, 1, dtype=np.int32)
+    time = np.arange(0, n, 1, dtype=np.int32) / 400
     escala = np.logspace(1, 3, num=200, dtype=np.int32)
     # escala = np.arange(0.1, 1, 0.01)
 
@@ -25,7 +25,7 @@ def grafica_freq(señal, fecha, eje):
     #               ax=ax2, cmap="jet", ylabel="Periodo [Segundos]", xlabel="Tiempo [segunndos/400]",
     #               title=f'Escalograma sobre {eje}')
     ax2 = scg.cws(time, señal, escala, yaxis='frequency', yscale='log',
-                  ax=ax2, cmap="jet", ylabel="Frecuencia [Hz]", xlabel="Tiempo [segunndos/400]",
+                  ax=ax2, cmap="jet", ylabel="Frecuencia [Hz]", xlabel="Tiempo [Segundo]",
                   title=f'Escalograma sobre {eje}')
 
     path = '/home/arielmardones/Documentos/Respaldo-Ariel'
