@@ -7,19 +7,35 @@ import urllib3
 
 
 def query_mysql(fecha_fin, minutos_antes):
-    fecha_inicio = fecha_fin - timedelta(minutes=minutos_antes)
-    print(f'{fecha_inicio} & {fecha_fin}')
-    http = urllib3.PoolManager()
-    if minutos_antes > 0:
-        url = "http://innotech.selfip.com:8282/consulta_ssvv.php?ini='{}'&fin='{}'&id=6".format(fecha_inicio, fecha_fin)
-    else:
-        url = "http://innotech.selfip.com:8282/consulta_ssvv.php?ini='{}'&fin='{}'&id=6".format(fecha_fin, fecha_inicio)
-    r = http.request('GET', url)
-    resultado = list(str(r.data).split("<br>"))[:-2]
+    horizonte_temporal = datetime.strptime('2018-07-19T23:00:00', '%Y-%m-%dT%H:%M:%S')
+    flag = False
+    cont = 0
+    while not flag:
+        fecha_inicio = fecha_fin - timedelta(minutes=minutos_antes)
 
-    for i in np.arange(len(resultado), 0, -1):
-        if 'r' in resultado[i - 1]:
-            del (resultado[i - 1])
+        http = urllib3.PoolManager()
+        if minutos_antes > 0:
+            url = "http://innotech.selfip.com:8282/consulta_ssvv.php?ini='{}'&fin='{}'&id=6".format(fecha_inicio, fecha_fin)
+        else:
+            url = "http://innotech.selfip.com:8282/consulta_ssvv.php?ini='{}'&fin='{}'&id=6".format(fecha_fin, fecha_inicio)
+        r = http.request('GET', url)
+        resultado = list(str(r.data).split("<br>"))[:-2]
+
+        for i in np.arange(len(resultado), 0, -1):
+            if 'r' in resultado[i - 1]:
+                del (resultado[i - 1])
+
+        if 0.9 * 24000 <= len(resultado) <= 1.1 * 24000:
+            flag = True
+        else:
+            cont += 1
+            fecha_fin = fecha_inicio
+            if fecha_inicio.date() < horizonte_temporal.date() or cont > 10:
+                print('Busqueda de ventana temporal fuera de rango.\nNo es posible estudiar en frecuencia este intervalo.\n')
+                df = pd.DataFrame()
+                return df, fecha_inicio
+
+    print(f'{fecha_inicio} & {fecha_fin}')
 
     lista = [None] * len(resultado)
 
