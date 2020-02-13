@@ -24,7 +24,7 @@ def grafica_freq(señal, fecha, eje):
     # ax2 = scg.cws(time, señal, escala, yscale='log',
     #               ax=ax2, cmap="jet", ylabel="Periodo [Segundos]", xlabel="Tiempo [segunndos/400]",
     #               title=f'Escalograma sobre {eje}')
-    ax2 = scg.cws(time, señal - np.mean(señal), yaxis='frequency', yscale='log', clim=(0, 150), cbar='horizontal',
+    ax2 = scg.cws(time, señal - np.mean(señal), yaxis='frequency', yscale='log', ylim=np.logspace(1, 150, 101), clim=(0, 150), cbar='horizontal',
                   cbarkw={'aspect': 30, 'pad': 0.3, 'fraction': 0.05}, ax=ax2, cmap="jet", ylabel="Frecuencia [Hz]", xlabel="Tiempo [Segundo]",
                   title=f'Escalograma sobre {eje}')
 
