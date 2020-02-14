@@ -1,35 +1,45 @@
 import pickle
-from pandas.plotting import register_matplotlib_converters
-import scaleogram as scg
-import numpy as np
+from datetime import datetime
+
 import matplotlib.pyplot as plt
+import numpy as np
+import scaleogram as scg
+from pandas.plotting import register_matplotlib_converters
+
 from Enero2020 import mysqlQuery_rf
-from datetime import timedelta, datetime
 
 register_matplotlib_converters()
 
 
-def grafica_freq(señal, fecha, eje):
+def grafica_freq(señal, fecha):
     n = len(señal)
     time = np.arange(0, n, 1, dtype=np.int32) / 400
     # escala = np.logspace(1, 4, num=200, dtype=np.int32)
     escala = np.arange(0, 100, 0.1)
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 6))
+    fig, (ax1, ax2, x3, x4) = plt.subplots(4, 1, figsize=(14, 6))
     fig.subplots_adjust(hspace=0.3)
-    ax1.plot(time, señal)
+    ax1.plot(time, señal['x'].values)
+    ax1.plot(time, señal['y'].values)
+    ax1.plot(time, señal['z'].values)
     ax1.set_xlim(0, max(time))
     ax1.set_title(f'Señal acelerómetro a las: {fecha}')
 
     # ax2 = scg.cws(time, señal, escala, yscale='log',
     #               ax=ax2, cmap="jet", ylabel="Periodo [Segundos]", xlabel="Tiempo [segunndos/400]",
     #               title=f'Escalograma sobre {eje}')
-    ax2 = scg.cws(time, señal - np.mean(señal), yaxis='frequency', yscale='log', ylim=np.logspace(1, 150, 101), clim=(0, 150), cbar='horizontal',
-                  cbarkw={'aspect': 30, 'pad': 0.3, 'fraction': 0.05}, ax=ax2, cmap="jet", ylabel="Frecuencia [Hz]", xlabel="Tiempo [Segundo]",
-                  title=f'Escalograma sobre {eje}')
+    ax2 = scg.cws(time, señal['x'].values - np.mean(señal['x'].values), yaxis='frequency', yscale='log', clim=(0, 100), ylim=[6, 200], cbar=None,
+                  ax=ax2, cmap="jet", ylabel="Frecuencia [Hz]", xlabel="Tiempo [Segundo]",
+                  title=f'Escalograma sobre x')
+
+    ax3 = scg.cws(time, señal['y'].values - np.mean(señal['y'].values), yaxis='frequency', yscale='log', cbar=None,  # clim=(0, 100), ylim=[6, 200],
+                  cmap="jet", ylabel="Frecuencia [Hz]", xlabel="Tiempo [Segundo]")
+
+    ax4 = scg.cws(time, señal['z'].values - np.mean(señal['z'].values), yaxis='frequency', yscale='log', cbar=None,  # clim=(0, 100), ylim=[6, 200],
+                  cmap="jet", ylabel="Frecuencia [Hz]", xlabel="Tiempo [Segundo]")
 
     path = '/home/arielmardones/Documentos/Respaldo-Ariel'
-    fig.savefig(f'{path}/escalograma_{fecha}: Eje {eje}.png', dpi=500)
+    fig.savefig(f'{path}/escalograma_{fecha}: Eje x.png', dpi=500)
     plt.close(fig)
     return
 
@@ -57,7 +67,7 @@ for cierre in df_fechas_cierre:
         df, fecha_in = mysqlQuery_rf.query_mysql(cierre[0], minutos_antes)
         # Transformación de las señales x, y, z en frecuencia sobre bandas de frecuencia
         if not df.empty:
-            grafica_freq(df['x'].values, fecha_in, 'x')
+            grafica_freq(df, fecha_in)
         # grafica_freq(df['y'].values, fecha_in, 'y')
         # grafica_freq(df['z'].values, fecha_in, 'z')
         # break
