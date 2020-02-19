@@ -17,29 +17,27 @@ def grafica_freq(señal, fecha):
     # escala = np.logspace(1, 4, num=200, dtype=np.int32)
     escala = np.arange(0, 100, 0.1)
 
-    fig, (ax1, ax2, x3, x4) = plt.subplots(4, 1, figsize=(14, 6))
+    fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(16, 8))
     fig.subplots_adjust(hspace=0.3)
     ax1.plot(time, señal['x'].values)
     ax1.plot(time, señal['y'].values)
     ax1.plot(time, señal['z'].values)
     ax1.set_xlim(0, max(time))
     ax1.set_title(f'Señal acelerómetro a las: {fecha}')
+    # print(np.mean(señal['x'].values))
+    # print(np.mean(señal['y'].values))
+    # print(np.mean(señal['z'].values))
+    ax2 = scg.cws(time, (señal['x'].values - 700), yaxis='frequency', yscale='log', clim=(0, 100), ylim=[6, 200], cbar=None,
+                  ax=ax2, cmap="jet", title='Escalograma', ylabel=" ", xlabel=" ")
 
-    # ax2 = scg.cws(time, señal, escala, yscale='log',
-    #               ax=ax2, cmap="jet", ylabel="Periodo [Segundos]", xlabel="Tiempo [segunndos/400]",
-    #               title=f'Escalograma sobre {eje}')
-    ax2 = scg.cws(time, señal['x'].values - np.mean(señal['x'].values), yaxis='frequency', yscale='log', clim=(0, 100), ylim=[6, 200], cbar=None,
-                  ax=ax2, cmap="jet", ylabel="Frecuencia [Hz]", xlabel="Tiempo [Segundo]",
-                  title=f'Escalograma sobre x')
+    ax3 = scg.cws(time, (señal['y'].values - 620), yaxis='frequency', yscale='log', cbar=None,  # clim=(0, 100), ylim=[6, 200],
+                  ax=ax3, cmap="jet", ylabel="Freq [Hz]", title='', xlabel=" ")
 
-    ax3 = scg.cws(time, señal['y'].values - np.mean(señal['y'].values), yaxis='frequency', yscale='log', cbar=None,  # clim=(0, 100), ylim=[6, 200],
-                  cmap="jet", ylabel="Frecuencia [Hz]", xlabel="Tiempo [Segundo]")
-
-    ax4 = scg.cws(time, señal['z'].values - np.mean(señal['z'].values), yaxis='frequency', yscale='log', cbar=None,  # clim=(0, 100), ylim=[6, 200],
-                  cmap="jet", ylabel="Frecuencia [Hz]", xlabel="Tiempo [Segundo]")
+    ax4 = scg.cws(time, (señal['z'].values + 10), yaxis='frequency', yscale='log', cbar=None,  # clim=(0, 100), ylim=[6, 200],
+                  ax=ax4, cmap="jet", xlabel="Tiempo [Segundo]", ylabel=" ", title='')
 
     path = '/home/arielmardones/Documentos/Respaldo-Ariel'
-    fig.savefig(f'{path}/escalograma_{fecha}: Eje x.png', dpi=500)
+    fig.savefig(f'{path}/escalograma_{fecha}: Eje x.png', dpi=600)
     plt.close(fig)
     return
 
