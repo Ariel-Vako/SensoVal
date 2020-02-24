@@ -8,7 +8,7 @@ import numpy as np
 import scaleogram as scg
 from pandas.plotting import register_matplotlib_converters
 
-from Enero2020 import mysqlQuery_rf
+from Enero2020 import mysqlQuery_rf, wavelet_discreta
 
 register_matplotlib_converters()
 
@@ -71,7 +71,10 @@ for cierre in df_fechas_cierre:
         # Transformación de las señales x, y, z en frecuencia sobre bandas de frecuencia
         if not df.empty:
             # grafica_freq(df, fecha_in)
-            ca, cd = wavelet_discreta(df)
+            dict_caract = {}
+            for eje in ['x', 'y', 'z']:
+                dict_caract[eje] = wavelet_discreta(df[eje].values)
+
     # break
     # Caracterización de las señales en frecuencia por banda y eje
     # Guardado en base de datos
