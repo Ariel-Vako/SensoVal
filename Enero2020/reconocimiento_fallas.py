@@ -1,3 +1,5 @@
+# -- coding: utf-8 --
+
 import pickle
 from datetime import datetime
 
@@ -24,26 +26,32 @@ def grafica_freq(señal, fecha):
     ax1.plot(time, señal['z'].values)
     ax1.set_xlim(0, max(time))
     ax1.set_title(f'Señal acelerómetro a las: {fecha}')
-    # print(np.mean(señal['x'].values))
-    # print(np.mean(señal['y'].values))
-    # print(np.mean(señal['z'].values))
+    ax1.legend(('Eje x', 'Eje y', 'Eje z'), loc='upper right')
+
     ax2 = scg.cws(time, (señal['x'].values - 700), yaxis='frequency', yscale='log', clim=(0, 100), ylim=[6, 200], cbar=None,
-                  ax=ax2, cmap="jet", title='Escalograma', ylabel=" ", xlabel=" ")
+                  ax=ax2, cmap="jet", title='Escalograma', ylabel="x", xlabel=" ")
 
     ax3 = scg.cws(time, (señal['y'].values - 620), yaxis='frequency', yscale='log', cbar=None,  # clim=(0, 100), ylim=[6, 200],
                   ax=ax3, cmap="jet", ylabel="Freq [Hz]", title='', xlabel=" ")
 
     ax4 = scg.cws(time, (señal['z'].values + 10), yaxis='frequency', yscale='log', cbar=None,  # clim=(0, 100), ylim=[6, 200],
-                  ax=ax4, cmap="jet", xlabel="Tiempo [Segundo]", ylabel=" ", title='')
+                  ax=ax4, cmap="jet", xlabel="Tiempo [Segundo]", ylabel="z", title='')
 
-    path = '/home/arielmardones/Documentos/Respaldo-Ariel'
-    fig.savefig(f'{path}/escalograma_{fecha}: Eje x.png', dpi=600)
+    # # Trabajo
+    # directorio = '/home/arielmardones/Documentos/Respaldo-Ariel'
+    # fig.savefig(f'{directorio}/escalograma_{fecha}.png', dpi=600)
+    # Home
+    directorio = r'C:\Users\ariel\OneDrive\Documentos\HStech\SensoVal\Val6\Gráficas_CWT'
+    fig.savefig(rf'{directorio}\Escalograma  {fecha.strftime("%Y-%m-%d %Hh%Mm%Ss")}.png', dpi=100, format='png')
     plt.close(fig)
     return
 
 
 valvula = 6  # VALVULA
-ruta = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvula}/'
+# # ruta Trabajo
+# ruta = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvula}/'
+# ruta Home
+ruta = f'C:/Users/ariel/OneDrive/Documentos/HStech/SensoVal/Val{valvula}/'
 
 file_fecha_apertura = ruta + f'Fechas_aperturas_val{valvula}'
 file_fecha_cierre = ruta + f'Fechas_cierres_val{valvula}'
@@ -55,21 +63,17 @@ with open(file_fecha_cierre, 'rb') as rf2:
     df_fechas_cierre = pickle.load(rf2)
 
 minutos_antes = 1  # ventana de estudio
-# horizonte_temporal = datetime.strptime('2018-12-01T00:00:00', '%Y-%m-%dT%H:%M:%S')
-# horizonte_temporal = datetime.strptime('2018-09-01T00:00:00', '%Y-%m-%dT%H:%M:%S')
 horizonte_temporal = datetime.strptime('2018-07-19T23:00:00', '%Y-%m-%dT%H:%M:%S')
 for cierre in df_fechas_cierre:
     # Extracción de datos antes del cierre
-    print(cierre[0])
     if cierre[0].date() > horizonte_temporal.date():
         df, fecha_in = mysqlQuery_rf.query_mysql(cierre[0], minutos_antes)
         # Transformación de las señales x, y, z en frecuencia sobre bandas de frecuencia
         if not df.empty:
-            grafica_freq(df, fecha_in)
-        # grafica_freq(df['y'].values, fecha_in, 'y')
-        # grafica_freq(df['z'].values, fecha_in, 'z')
-        # break
-        # Caracterización de las señales en frecuencia por banda y eje
-        # Guardado en base de datos
+            # grafica_freq(df, fecha_in)
+            ca, cd = wavelet_discreta(df)
+    # break
+    # Caracterización de las señales en frecuencia por banda y eje
+    # Guardado en base de datos
 
 print('')
