@@ -8,7 +8,7 @@ import numpy as np
 import scaleogram as scg
 from pandas.plotting import register_matplotlib_converters
 
-from Enero2020 import mysqlQuery_rf, wavelet_discreta
+from Enero2020 import mysqlQuery_rf, extracción_caract
 
 register_matplotlib_converters()
 
@@ -49,9 +49,9 @@ def grafica_freq(señal, fecha):
 
 valvula = 6  # VALVULA
 # # ruta Trabajo
-# ruta = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvula}/'
+ruta = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvula}/'
 # ruta Home
-ruta = f'C:/Users/ariel/OneDrive/Documentos/HStech/SensoVal/Val{valvula}/'
+# ruta = f'C:/Users/ariel/OneDrive/Documentos/HStech/SensoVal/Val{valvula}/'
 
 file_fecha_apertura = ruta + f'Fechas_aperturas_val{valvula}'
 file_fecha_cierre = ruta + f'Fechas_cierres_val{valvula}'
@@ -64,6 +64,7 @@ with open(file_fecha_cierre, 'rb') as rf2:
 
 minutos_antes = 1  # ventana de estudio
 horizonte_temporal = datetime.strptime('2018-07-19T23:00:00', '%Y-%m-%dT%H:%M:%S')
+dict_caract = {}
 for cierre in df_fechas_cierre:
     # Extracción de datos antes del cierre
     if cierre[0].date() > horizonte_temporal.date():
@@ -71,9 +72,7 @@ for cierre in df_fechas_cierre:
         # Transformación de las señales x, y, z en frecuencia sobre bandas de frecuencia
         if not df.empty:
             # grafica_freq(df, fecha_in)
-            dict_caract = {}
-            for eje in ['x', 'y', 'z']:
-                dict_caract[eje] = wavelet_discreta(df[eje].values)
+            dict_caract[fecha_in] = extracción_caract.features_from_wavelet(df)
 
     # break
     # Caracterización de las señales en frecuencia por banda y eje

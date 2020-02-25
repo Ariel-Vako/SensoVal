@@ -4,15 +4,6 @@ import scipy
 import scipy.optimize
 import scipy.stats
 import collections
-import matplotlib
-
-matplotlib.use('Agg')
-
-
-def wavelet_discreta(signal):
-    coeff = pywt.wavedec(signal, wavelet, mode="per", level=10)
-    caract = get_features(coeff)
-    return dict_caractxbanda
 
 
 def calculate_entropy(list_values):
@@ -50,3 +41,15 @@ def get_features(list_values):
     crossings = calculate_crossings(list_values)
     statistics = calculate_statistics(list_values)
     return [entropy] + crossings + statistics
+
+
+def features_from_wavelet(data):
+    wavelets = ['db1', 'db6', 'db8', 'db10']
+    features = []
+    for eje in ['x', 'y', 'z']:
+        signal = data[eje].values
+        for wavelet in wavelets:
+            coeff = pywt.wavedec(signal, wavelet, mode="per", level=10)
+            for coeficiente in coeff:
+                features.append(get_features(coeficiente))
+    return features
