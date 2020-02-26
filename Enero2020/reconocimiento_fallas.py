@@ -78,4 +78,4 @@ for cierre in df_fechas_cierre:
     # Caracterización de las señales en frecuencia por banda y eje
     # Guardado en base de datos
 
-print('')
+

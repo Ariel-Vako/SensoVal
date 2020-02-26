@@ -15,7 +15,7 @@ def mapeo_fechas(cadena):
 def query(valvula):
     fecha_inicio = '2018-07-01'
     cliente = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
-    consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE angulo_sensor < 15 AND angulo_sensor  > -30 AND id_sensor = '{}' AND time > '{}'".format(valvula, fecha_inicio)
+    consulta = "SELECT angulo_sensor as Angulo, time as Fecha FROM angulos_svia WHERE angulo_sensor < 0 AND angulo_sensor  > -30 AND id_sensor = '{}' AND time > '{}'".format(valvula, fecha_inicio)
     resultado = cliente.query(consulta)
     cliente.close()
 
