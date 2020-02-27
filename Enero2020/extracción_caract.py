@@ -44,6 +44,7 @@ def get_features(list_values):
 
 
 def features_from_wavelet(data):
+    # 132 columnas = 3 ejes * 4 wavelets * 11 vectores de coeficientes.
     wavelets = ['db1', 'db6', 'db8', 'db10']
     features = []
     for eje in ['x', 'y', 'z']:
@@ -53,3 +54,4 @@ def features_from_wavelet(data):
             for coeficiente in coeff:
                 features.append(get_features(coeficiente))
     return features
+

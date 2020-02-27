@@ -93,7 +93,7 @@ def last_query(date, valvula):
     return df
 
 
-valvula = 6  # VALVULA
+valvula = 9  # VALVULA
 ruta = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvula}/'
 query_bckup = ruta + f'query_influx_sensoVal{valvula}.txt'
 
@@ -150,21 +150,21 @@ for row in range(len(sectores_con_transiente)):
                     aperturas_fechas.append([df_transiente['fecha'].iloc[i], df_transiente['fecha'].iloc[f]])
             print(f'Key: {key}')
 
-# file_apertura = ruta + f'Aperturas_val{valvula}'
-# file_cierre = ruta + f'Cierres_val{valvula}'
-#
-# file_fecha_apertura = ruta + f'Fechas_aperturas_val{valvula}'
-# file_fecha_cierre = ruta + f'Fechas_cierres_val{valvula}'
-#
-# with open(file_apertura, 'wb') as fl:
-#     pickle.dump(aperturas,fl)
-#
-# with open(file_cierre, 'wb') as fl2:
-#     pickle.dump(cierres, fl2)
-#
-# with open(file_fecha_apertura, 'wb') as fl3:
-#     pickle.dump(aperturas_fechas,fl3)
-#
-# with open(file_fecha_cierre, 'wb') as fl4:
-#     pickle.dump(cierres_fechas, fl4)
+file_apertura = ruta + f'Aperturas_val{valvula}'
+file_cierre = ruta + f'Cierres_val{valvula}'
+
+file_fecha_apertura = ruta + f'Fechas_aperturas_val{valvula}'
+file_fecha_cierre = ruta + f'Fechas_cierres_val{valvula}'
+
+with open(file_apertura, 'wb') as fl:
+    pickle.dump(aperturas,fl)
+
+with open(file_cierre, 'wb') as fl2:
+    pickle.dump(cierres, fl2)
+
+with open(file_fecha_apertura, 'wb') as fl3:
+    pickle.dump(aperturas_fechas,fl3)
+
+with open(file_fecha_cierre, 'wb') as fl4:
+    pickle.dump(cierres_fechas, fl4)
 
