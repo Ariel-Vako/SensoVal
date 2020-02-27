@@ -2,7 +2,7 @@
 
 import pickle
 from datetime import datetime
-
+import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import scaleogram as scg
@@ -47,35 +47,42 @@ def grafica_freq(señal, fecha):
     return
 
 
-valvula = 6  # VALVULA
-# # ruta Trabajo
-ruta = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvula}/'
-# ruta Home
-# ruta = f'C:/Users/ariel/OneDrive/Documentos/HStech/SensoVal/Val{valvula}/'
+valvulas = [6, 8, 9]  # VALVULA
+for valvula in valvulas:
+    # # ruta Trabajo
+    ruta = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvula}/'
+    # ruta Home
+    # ruta = f'C:/Users/ariel/OneDrive/Documentos/HStech/SensoVal/Val{valvula}/'
 
-file_fecha_apertura = ruta + f'Fechas_aperturas_val{valvula}'
-file_fecha_cierre = ruta + f'Fechas_cierres_val{valvula}'
+    file_fecha_apertura = ruta + f'Fechas_aperturas_val{valvula}'
+    file_fecha_cierre = ruta + f'Fechas_cierres_val{valvula}'
 
-with open(file_fecha_apertura, 'rb') as rf1:
-    df_fechas_aperturas = pickle.load(rf1)
+    with open(file_fecha_apertura, 'rb') as rf1:
+        df_fechas_aperturas = pickle.load(rf1)
 
-with open(file_fecha_cierre, 'rb') as rf2:
-    df_fechas_cierre = pickle.load(rf2)
+    with open(file_fecha_cierre, 'rb') as rf2:
+        df_fechas_cierre = pickle.load(rf2)
 
-minutos_antes = 1  # ventana de estudio
-horizonte_temporal = datetime.strptime('2018-07-19T23:00:00', '%Y-%m-%dT%H:%M:%S')
-dict_caract = {}
-for cierre in df_fechas_cierre:
-    # Extracción de datos antes del cierre
-    if cierre[0].date() > horizonte_temporal.date():
-        df, fecha_in = mysqlQuery_rf.query_mysql(cierre[0], minutos_antes)
-        # Transformación de las señales x, y, z en frecuencia sobre bandas de frecuencia
-        if not df.empty:
-            # grafica_freq(df, fecha_in)
-            dict_caract[fecha_in] = extracción_caract.features_from_wavelet(df)
+    minutos_antes = 1  # ventana de estudio
+    horizonte_temporal = datetime.strptime('2018-07-19T23:00:00', '%Y-%m-%dT%H:%M:%S')
+    dict_caract = {}
+    for cierre in df_fechas_cierre:
+        # Extracción de datos antes del cierre
+        if cierre[0].date() > horizonte_temporal.date():
+            df, fecha_in = mysqlQuery_rf.query_mysql(cierre[0], minutos_antes)
+            # Transformación de las señales x, y, z en frecuencia sobre bandas de frecuencia
+            if not df.empty:
+                # grafica_freq(df, fecha_in)
+                dict_caract[fecha_in] = extracción_caract.features_from_wavelet(df)
 
-    # break
-    # Caracterización de las señales en frecuencia por banda y eje
-    # Guardado en base de datos
+        # Guardado en base de datos
 
-
+    df = pd.DataFrame()
+    # Reorganizar a dataframe
+    df = pd.DataFrame.from_dict(dict_caract, orient='index')
+    # Agregar columna de valvula
+    df['válvula'] = valvula
+    # Guardamos con pickle como Dataframe
+    file_apertura = ruta + f'Precierre_val{valvula}'
+    with open(file_apertura, 'wb') as fl:
+        pickle.dump(df, fl)
