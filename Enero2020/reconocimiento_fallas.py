@@ -50,9 +50,9 @@ def grafica_freq(señal, fecha):
 valvulas = [6, 8, 9]  # VALVULA
 for valvula in valvulas:
     # # ruta Trabajo
-    ruta = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvula}/'
+    # ruta = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvula}/'
     # ruta Home
-    # ruta = f'C:/Users/ariel/OneDrive/Documentos/HStech/SensoVal/Val{valvula}/'
+    ruta = f'C:/Users/ariel/OneDrive/Documentos/HStech/SensoVal/Val{valvula}/'
 
     file_fecha_apertura = ruta + f'Fechas_aperturas_val{valvula}'
     file_fecha_cierre = ruta + f'Fechas_cierres_val{valvula}'

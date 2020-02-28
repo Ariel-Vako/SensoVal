@@ -52,6 +52,5 @@ def features_from_wavelet(data):
         for wavelet in wavelets:
             coeff = pywt.wavedec(signal, wavelet, mode="per", level=10)
             for coeficiente in coeff:
-                features.append(get_features(coeficiente))
+                features += get_features(coeficiente)
     return features
-
