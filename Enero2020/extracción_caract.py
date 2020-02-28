@@ -45,11 +45,10 @@ def get_features(list_values):
 
 def features_from_wavelet(data):
     # 132 columnas = 3 ejes * 4 wavelets * 11 vectores de coeficientes.
-    wavelets = ['db1', 'db6', 'db8', 'db10']
     features = []
     for eje in ['x', 'y', 'z']:
         signal = data[eje].values
-        for wavelet in wavelets:
+        for wavelet in ['db1', 'db6', 'db8', 'db10']:
             coeff = pywt.wavedec(signal, wavelet, mode="per", level=10)
             for coeficiente in coeff:
                 features += get_features(coeficiente)
