@@ -51,7 +51,8 @@ file = ruta + f'Precierre'
 with open(file, 'rb') as rf:
     df = pickle.load(rf)
 
+medidas = clustering.métricas(df.iloc[:, 0:-2], 7)
 
-medidas = clustering.métricas(df,7)
-
+cluster_02 = clustering.clustering_precierre(df.iloc[:, 0:-2], 2)
+cluster_03 = clustering.clustering_precierre(df.iloc[:, 0:-2], 3)
 print('')
