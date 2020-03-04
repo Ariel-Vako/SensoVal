@@ -44,14 +44,14 @@ def clustering_precierre(signal_features, no_cluster=7):
     # optics.fit(signal_features)
     #
     # # --- Birch
-    brc = Birch(branching_factor=100, n_clusters=no_cluster, threshold=20, compute_labels=True)
-    brc.fit(signal_features)
+    # brc = Birch(branching_factor=100, n_clusters=no_cluster, threshold=20, compute_labels=True)
+    # brc.fit(signal_features)
 
     # --- Agglomerative Clustering - Solo métrica euclidiana
-    # clustering_complete = AgglomerativeClustering(linkage='single', n_clusters=no_cluster)
-    # clustering_complete.fit(signal_features)
+    clustering_complete = AgglomerativeClustering(linkage='single', n_clusters=no_cluster)
+    clustering_complete.fit(signal_features)
 
-    return brc
+    return clustering_complete
 
 
 def componentes_principales(df_features, n):
