@@ -117,7 +117,6 @@ def graficar_pca(matriz, labels, i):
 
 
 def métricas(signal_features, no_cluster):
-
     n = no_cluster
     u = range(2, n)
     size = len(u)
@@ -125,7 +124,7 @@ def métricas(signal_features, no_cluster):
     # Método para definición de método de clustering y cantidad de clusters
     df_kmeans = pd.DataFrame(data=np.full([size, 3], np.nan), columns=['ss kmeans', 'ch kmeas', 'db kmeans'])
     df_mbatch = pd.DataFrame(data=np.full([size, 3], np.nan), columns=['ss mbatch', 'ch mbatch', 'db mbatch'])
-    df_affin = pd.DataFrame(data=np.full([size, 3], np.nan), columns=['ss affin', 'ch affin', 'db affin'])
+    # df_affin = pd.DataFrame(data=np.full([size, 3], np.nan), columns=['ss affin', 'ch affin', 'db affin'])
     df_ward = pd.DataFrame(data=np.full([size, 3], np.nan), columns=['ss Ward', 'ch Ward', 'db Ward'])
     df_aver = pd.DataFrame(data=np.full([size, 3], np.nan), columns=['ss Average', 'ch Average', 'db Average'])
     df_comp = pd.DataFrame(data=np.full([size, 3], np.nan), columns=['ss Complete', 'ch Complete', 'db Complete'])
@@ -139,12 +138,12 @@ def métricas(signal_features, no_cluster):
         cluster_mnbatch = MiniBatchKMeans(n_clusters=i, random_state=0, max_iter=10).fit(signal_features)
         df_mbatch.iloc[i - 2, :] = unidimensional_metrics(signal_features, cluster_mnbatch.labels_)
 
-        desv = np.std(signal_features, axis=1)
-        if isinstance(desv, pd.Series):
-            desv = desv.values
-        affinity = np.exp(-euclidean_distances(signal_features) / desv)
-        labels_sc = spectral_clustering(affinity, n_clusters=i, eigen_solver='arpack')
-        df_affin.iloc[i - 2, :] = unidimensional_metrics(signal_features, labels_sc)
+        # desv = np.std(signal_features, axis=1)
+        # if isinstance(desv, pd.Series):
+        #     desv = desv.values
+        # affinity = np.exp(-euclidean_distances(signal_features) / desv)
+        # labels_sc = spectral_clustering(affinity, n_clusters=i, eigen_solver='amg')
+        # df_affin.iloc[i - 2, :] = unidimensional_metrics(signal_features, labels_sc)
 
         clustering_ward = AgglomerativeClustering(linkage='ward', n_clusters=i)
         cluster_ward = clustering_ward.fit(signal_features)
@@ -166,7 +165,7 @@ def métricas(signal_features, no_cluster):
         cluster_birch = brc.fit(signal_features)
         df_birch.iloc[i - 2, :] = unidimensional_metrics(signal_features, cluster_birch.labels_)
 
-    df = pd.concat([df_kmeans, df_mbatch, df_affin, df_ward, df_aver, df_comp, df_single, df_birch], axis=1, sort=False)
+    df = pd.concat([df_kmeans, df_mbatch, df_ward, df_aver, df_comp, df_single, df_birch], axis=1, sort=False)
     df = df.reindex(sorted(df.columns), axis=1)
     df['N° Cluster'] = list(u)
     df.set_index('N° Cluster', inplace=True)
