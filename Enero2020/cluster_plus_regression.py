@@ -77,18 +77,20 @@ rescaledX = pd.DataFrame(scaler.transform(x), columns=x.columns)
 
 # Remover variables con escada información.
 reduced_data = variance_threshold_selector(rescaledX, 0.1)
-reduced_data.set_index(x.index, inplace=True)
+# rd = reduced_data.sort_index()
+fechas = pd.DataFrame(x.index)
 
 # Cluster de 2 y 3 grupos salen escogidos.
 # medidas = clustering.métricas(reduced_data, 7)
 
 # Split the data
-reduced_data['valvula'] = df['valvula']
+reduced_data['valvula'] = df['valvula'].values
 reduced_data['etiqueta'] = -1
-x_train, x_test = train_test_split(reduced_data, test_size=0.2, random_state=42)
-aux_train = x_train[x_train['valvula'] == 0]
+x_train, x_test = train_test_split(reduced_data, test_size=0.1, random_state=42)
+# aux_train = x_train[x_train['valvula'] == 0]
 
 # Casos conocidos de fallas. Cambio de valor de algunas etiquetas
+x_train.loc['15', 'etiqueta'] = 0
 
 # Modelo semi-supervisado para las etiquetas
 lp_model = LabelSpreading(gamma=0.25, max_iter=20)
