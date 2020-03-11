@@ -60,6 +60,7 @@ file = ruta + f'Precierre'
 with open(file, 'rb') as rf:
     df = pickle.load(rf)
 
+df.drop([df.index[33], df.index[34], df.index[35], df.index[36], df.index[37], df.index[38]], inplace=True)
 class_le = LabelEncoder()
 df['valvula'] = class_le.fit_transform(df['valvula'].values)
 x = df.loc[:, df.columns[0]:df.columns[-2]]
@@ -77,6 +78,7 @@ rescaledX = pd.DataFrame(scaler.transform(x), columns=x.columns)
 
 # Remover variables con escada información.
 reduced_data = variance_threshold_selector(rescaledX, 0.1)
+
 # rd = reduced_data.sort_index()
 fechas = pd.DataFrame(x.index)
 
@@ -86,17 +88,41 @@ fechas = pd.DataFrame(x.index)
 # Split the data
 reduced_data['valvula'] = df['valvula'].values
 reduced_data['etiqueta'] = -1
+# Casos conocidos de fallas. Cambio de valor de algunas etiquetas
+# Buenas
+reduced_data.loc[0, 'etiqueta'] = 1
+reduced_data.loc[1, 'etiqueta'] = 1
+reduced_data.loc[2, 'etiqueta'] = 1
+reduced_data.loc[3, 'etiqueta'] = 1
+reduced_data.loc[4, 'etiqueta'] = 1
+reduced_data.loc[5, 'etiqueta'] = 1
+reduced_data.loc[6, 'etiqueta'] = 1
+reduced_data.loc[7, 'etiqueta'] = 1
+reduced_data.loc[8, 'etiqueta'] = 1
+reduced_data.loc[9, 'etiqueta'] = 1
+reduced_data.loc[10, 'etiqueta'] = 1
+
+# Malas
+reduced_data.loc[15, 'etiqueta'] = 0
+reduced_data.loc[23, 'etiqueta'] = 0
+reduced_data.loc[24, 'etiqueta'] = 0
+reduced_data.loc[25, 'etiqueta'] = 0
+reduced_data.loc[28, 'etiqueta'] = 0
+reduced_data.loc[29, 'etiqueta'] = 0
+reduced_data.loc[30, 'etiqueta'] = 0
+reduced_data.loc[31, 'etiqueta'] = 0
+
+
 x_train, x_test = train_test_split(reduced_data, test_size=0.1, random_state=42)
 # aux_train = x_train[x_train['valvula'] == 0]
-
-# Casos conocidos de fallas. Cambio de valor de algunas etiquetas
-x_train.loc['15', 'etiqueta'] = 0
+x_train.sort_index(inplace=True)
+x_test.sort_index(inplace=True)
 
 # Modelo semi-supervisado para las etiquetas
-lp_model = LabelSpreading(gamma=0.25, max_iter=20)
-lp_model.fit(reduced_data.loc[:, reduced_data.columns[0]:reduced_data.columns[-2]], reduced_data['etiqueta'])
+lp_model = LabelSpreading(kernel='knn', max_iter=20)
+ls = lp_model.fit(x_train.loc[:, x_train.columns[0]:x_train.columns[-2]], x_train['etiqueta'])
 
-predicted_labels = lp_model.transduction_[unlabeled_indices]
+predicted_labels = lp_model.transduction_[x_test.loc[:, x_test.columns[0]:x_test.columns[-2]]]
 true_labels = y[unlabeled_indices]
 
 cluster_02 = clustering.clustering_precierre(df.iloc[:, 0:-2], 2)
