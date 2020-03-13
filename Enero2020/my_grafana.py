@@ -70,6 +70,11 @@ import pandas as pd
 # fecha_inicio  = '2018-12-31 03:52:59'
 # fecha_fin     = '2019-01-01 12:52:59'
 
+# index: 26 -
+fecha_inicio  = '2019-01-02 01:19:21'
+fecha_fin     = '2019-01-02 01:49:21'
+
+
 # index: 28 - MALO
 # fecha_inicio  = '2019-01-02 03:15:57'
 # fecha_fin     = '2019-01-02 03:22:57'
@@ -91,8 +96,8 @@ import pandas as pd
 # fecha_fin     = '2019-01-25 09:18:52'
 
 # index: 33 - MALO
-fecha_inicio  = '2019-01-24 22:29:29'
-fecha_fin     = '2019-01-24 22:29:29'
+# fecha_inicio  = '2019-01-24 22:29:29'
+# fecha_fin     = '2019-01-24 22:29:29'
 
 
 

@@ -5,8 +5,10 @@ from Enero2020 import clustering
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder, Normalizer, StandardScaler, RobustScaler
 from sklearn.feature_selection import VarianceThreshold
 import pandas as pd
-from sklearn.semi_supervised import LabelSpreading
+from sklearn.semi_supervised import LabelSpreading, LabelPropagation
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+
 
 
 def variance_threshold_selector(data, threshold=0.5):
@@ -101,6 +103,7 @@ reduced_data.loc[7, 'etiqueta'] = 1
 reduced_data.loc[8, 'etiqueta'] = 1
 reduced_data.loc[9, 'etiqueta'] = 1
 reduced_data.loc[10, 'etiqueta'] = 1
+reduced_data.loc[26, 'etiqueta'] = 1
 
 # Malas
 reduced_data.loc[15, 'etiqueta'] = 0
@@ -118,16 +121,18 @@ x_train, x_test = train_test_split(reduced_data, test_size=0.1, random_state=42)
 x_train.sort_index(inplace=True)
 x_test.sort_index(inplace=True)
 
-# Modelo semi-supervisado para las etiquetas
-lp_model = LabelSpreading(kernel='knn', max_iter=20)
-ls = lp_model.fit(x_train.loc[:, x_train.columns[0]:x_train.columns[-2]], x_train['etiqueta'])
+# Modelos semi-supervisado para las etiquetas
+ls_model = LabelSpreading(kernel='knn', max_iter=40)
+ls = ls_model.fit(x_train.loc[:, x_train.columns[0]:x_train.columns[-2]], x_train['etiqueta'])
 
-predicted_labels = lp_model.transduction_[x_test.loc[:, x_test.columns[0]:x_test.columns[-2]]]
-true_labels = y[unlabeled_indices]
+x_train['Spreading']= ls.transduction_
+# lp_model = LabelPropagation(kernel='knn', max_iter=40)
+# lp = lp_model.fit(x_train.loc[:, x_train.columns[0]:x_train.columns[-2]], x_train['etiqueta'])
 
-cluster_02 = clustering.clustering_precierre(df.iloc[:, 0:-2], 2)
-cluster_03 = clustering.clustering_precierre(df.iloc[:, 0:-2], 3)
-
-df['etiqueta_2'] = cluster_02.labels_
-df['etiqueta_3'] = cluster_03.labels_
-print('')
+mrl = LogisticRegression(random_state=0).fit(x_train.loc[:, x_train.columns[0]:x_train.columns[-3]], x_train['Spreading'])
+mrl.predict(x_test.loc[:, x_train.columns[0]:x_train.columns[-3]])
+# u2 = pd.DataFrame(fechas.values, columns=['fechas'])
+# u2['valvula']= reduced_data['valvula']
+# u2['etiqueta']= reduced_data['etiqueta']
+# x_train['Spreading']= ls.transduction_
+# # x_train['Propagation']= lp.transduction_
