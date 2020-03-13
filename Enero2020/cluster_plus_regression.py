@@ -130,7 +130,8 @@ x_train['Spreading']= ls.transduction_
 # lp = lp_model.fit(x_train.loc[:, x_train.columns[0]:x_train.columns[-2]], x_train['etiqueta'])
 
 mrl = LogisticRegression(random_state=0).fit(x_train.loc[:, x_train.columns[0]:x_train.columns[-3]], x_train['Spreading'])
-mrl.predict(x_test.loc[:, x_train.columns[0]:x_train.columns[-3]])
+prediction = mrl.predict_proba(x_test.loc[:, x_train.columns[0]:x_train.columns[-3]])
+print(prediction)
 # u2 = pd.DataFrame(fechas.values, columns=['fechas'])
 # u2['valvula']= reduced_data['valvula']
 # u2['etiqueta']= reduced_data['etiqueta']
