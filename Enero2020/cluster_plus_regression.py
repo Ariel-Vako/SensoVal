@@ -8,7 +8,7 @@ import pandas as pd
 from sklearn.semi_supervised import LabelSpreading, LabelPropagation
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-
+from os import path
 
 
 def variance_threshold_selector(data, threshold=0.5):
@@ -18,24 +18,28 @@ def variance_threshold_selector(data, threshold=0.5):
 
 
 valvulas = [6, 8, 9]
+ruta_windows = 'C:/Users/ariel/OneDrive/Documentos/HStech/SensoVal/Datos pre-cierre/'
+if path.exists(ruta_windows):
+    ruta6 = ruta8 = ruta9 = ruta_windows
+else:
+    # Lectura características válvula 6
+    ruta6 = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvulas[0]}/'
+    # Lectura características válvula 8
+    ruta8 = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvulas[1]}/'
+    # Lectura características válvula 9
+    ruta9 = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvulas[2]}/'
 
-# Lectura características válvula 6
-ruta = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvulas[0]}/'
-file6 = ruta + f'Precierre_val{valvulas[0]}'
+file6 = ruta6 + f'Precierre_val{valvulas[0]}'
 
 with open(file6, 'rb') as rf:
     df6 = pickle.load(rf)
 
-# Lectura características válvula 8
-ruta = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvulas[1]}/'
-file8 = ruta + f'Precierre_val{valvulas[1]}'
+file8 = ruta8 + f'Precierre_val{valvulas[1]}'
 
 with open(file8, 'rb') as rf:
     df8 = pickle.load(rf)
 
-# Lectura características válvula 9
-ruta = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvulas[2]}/'
-file9 = ruta + f'Precierre_val{valvulas[2]}'
+file9 = ruta9 + f'Precierre_val{valvulas[2]}'
 
 with open(file9, 'rb') as rf:
     df9 = pickle.load(rf)
@@ -67,7 +71,7 @@ class_le = LabelEncoder()
 df['valvula'] = class_le.fit_transform(df['valvula'].values)
 x = df.loc[:, df.columns[0]:df.columns[-2]]
 
-# Centrado y escalado por desviación estandar
+# Centrado y escalado por desviación estándar
 scaler = RobustScaler().fit(x)
 # rescaledX = scaler.transform(x)
 rescaledX = pd.DataFrame(scaler.transform(x), columns=x.columns)
@@ -115,7 +119,6 @@ reduced_data.loc[29, 'etiqueta'] = 0
 reduced_data.loc[30, 'etiqueta'] = 0
 reduced_data.loc[31, 'etiqueta'] = 0
 
-
 x_train, x_test = train_test_split(reduced_data, test_size=0.1, random_state=42)
 # aux_train = x_train[x_train['valvula'] == 0]
 x_train.sort_index(inplace=True)
@@ -125,7 +128,7 @@ x_test.sort_index(inplace=True)
 ls_model = LabelSpreading(kernel='knn', max_iter=40)
 ls = ls_model.fit(x_train.loc[:, x_train.columns[0]:x_train.columns[-2]], x_train['etiqueta'])
 
-x_train['Spreading']= ls.transduction_
+x_train['Spreading'] = ls.transduction_
 # lp_model = LabelPropagation(kernel='knn', max_iter=40)
 # lp = lp_model.fit(x_train.loc[:, x_train.columns[0]:x_train.columns[-2]], x_train['etiqueta'])
 
