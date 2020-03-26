@@ -5,10 +5,20 @@ from Enero2020 import clustering
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder, Normalizer, StandardScaler, RobustScaler
 from sklearn.feature_selection import VarianceThreshold
 import pandas as pd
-from sklearn.semi_supervised import LabelSpreading, LabelPropagation
+from sklearn.semi_supervised import LabelSpreading
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
 from os import path
+from sklearn.model_selection import cross_val_score
+from sklearn import svm
+from sklearn.naive_bayes import GaussianNB
+import pomegranate as pg
+from sklearn.metrics import classification_report, accuracy_score
+
+
+import warnings
+
+warnings.simplefilter('ignore')
 
 
 def variance_threshold_selector(data, threshold=0.5):
@@ -20,7 +30,7 @@ def variance_threshold_selector(data, threshold=0.5):
 valvulas = [6, 8, 9]
 ruta_windows = 'C:/Users/ariel/OneDrive/Documentos/HStech/SensoVal/Datos pre-cierre/'
 if path.exists(ruta_windows):
-    ruta6 = ruta8 = ruta9 = ruta_windows
+    ruta6 = ruta8 = ruta9 = ruta = ruta2 = ruta_windows
 else:
     # Lectura características válvula 6
     ruta6 = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvulas[0]}/'
@@ -28,6 +38,10 @@ else:
     ruta8 = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvulas[1]}/'
     # Lectura características válvula 9
     ruta9 = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/val{valvulas[2]}/'
+
+    ruta2 = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/'
+
+    ruta = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/'
 
 file6 = ruta6 + f'Precierre_val{valvulas[0]}'
 
@@ -55,12 +69,10 @@ df = df6.append(df8.append(df9))
 aux = features_names + ['valvula']
 df.columns = aux
 
-ruta2 = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/'
 precierre = ruta2 + f'Precierre'
 with open(precierre, 'wb') as fl:
     pickle.dump(df, fl)
 
-ruta = f'/home/arielmardones/Documentos/Respaldo-Ariel/SensoVal/Datos/'
 file = ruta + f'Precierre'
 
 with open(file, 'rb') as rf:
@@ -108,6 +120,13 @@ reduced_data.loc[8, 'etiqueta'] = 1
 reduced_data.loc[9, 'etiqueta'] = 1
 reduced_data.loc[10, 'etiqueta'] = 1
 reduced_data.loc[26, 'etiqueta'] = 1
+reduced_data.loc[62, 'etiqueta'] = 1
+reduced_data.loc[63, 'etiqueta'] = 1
+reduced_data.loc[64, 'etiqueta'] = 1
+reduced_data.loc[95, 'etiqueta'] = 1
+reduced_data.loc[96, 'etiqueta'] = 1
+reduced_data.loc[97, 'etiqueta'] = 1
+reduced_data.loc[98, 'etiqueta'] = 1
 
 # Malas
 reduced_data.loc[15, 'etiqueta'] = 0
@@ -119,21 +138,74 @@ reduced_data.loc[29, 'etiqueta'] = 0
 reduced_data.loc[30, 'etiqueta'] = 0
 reduced_data.loc[31, 'etiqueta'] = 0
 
-x_train, x_test = train_test_split(reduced_data, test_size=0.1, random_state=42)
+# TODO: Quitar párrafo después de comprobar el cross validation
+xx = reduced_data[reduced_data['etiqueta']!=-1].loc[:, reduced_data.columns[0]:reduced_data.columns[-3]]
+yy = reduced_data[reduced_data['etiqueta']!=-1]['etiqueta']
+
+mrl = LogisticRegression()
+mrl_scores = cross_val_score(mrl, xx, yy, cv=10).mean()
+
+rgn = svm.SVC()
+rgn_scores = cross_val_score(rgn, xx, yy, cv=10).mean()
+
+gnb = GaussianNB()
+gnb_scores = cross_val_score(gnb, xx, yy, cv=10).mean()
+
+print()
+
+
+
+
+
+x_train, x_test = train_test_split(reduced_data, test_size=0.1, random_state=3)
 # aux_train = x_train[x_train['valvula'] == 0]
 x_train.sort_index(inplace=True)
 x_test.sort_index(inplace=True)
 
-# Modelos semi-supervisado para las etiquetas
-ls_model = LabelSpreading(kernel='knn', max_iter=40)
-ls = ls_model.fit(x_train.loc[:, x_train.columns[0]:x_train.columns[-2]], x_train['etiqueta'])
+# Rename variables
+X = x_train[x_train['etiqueta'] != -1].loc[:, x_train.columns[0]:x_train.columns[-3]]
+# y = x_train[x_train['etiqueta'] != -1]['Spreading']
+y = x_train[x_train['etiqueta'] != -1]['etiqueta']
+test = x_test[x_test['etiqueta'] != -1].loc[:, x_train.columns[0]:x_train.columns[-3]]
 
-x_train['Spreading'] = ls.transduction_
+# Modelos semi-supervisado para las etiquetas
+# ls_model = LabelSpreading(kernel='knn', max_iter=80, alpha=0.1, n_neighbors=12)
+
+# ls_model = LabelSpreading()
+# ls = ls_model.fit(x_train.loc[:, x_train.columns[0]:x_train.columns[-2]], x_train['etiqueta'])
+#
+# nb = pg.NaiveBayes.from_samples(pg.BernoulliDistribution, verbose=True)
+#
+# x_train['Spreading'] = ls.transduction_
+
 # lp_model = LabelPropagation(kernel='knn', max_iter=40)
 # lp = lp_model.fit(x_train.loc[:, x_train.columns[0]:x_train.columns[-2]], x_train['etiqueta'])
 
-mrl = LogisticRegression(random_state=0).fit(x_train.loc[:, x_train.columns[0]:x_train.columns[-3]], x_train['Spreading'])
-prediction = mrl.predict_proba(x_test.loc[:, x_train.columns[0]:x_train.columns[-3]])
+
+# Logistic Regression
+mrl = LogisticRegressionCV(cv=10, random_state=0, class_weight="auto").fit(X, y)
+prediction_lr = mrl.predict_proba(test)
+print(mrl.score(X,y))
+# Support Vector Regression
+svr = svm.SVR(class_weight='balanced', # penalize
+              probability=True)
+svr.fit(X, y)
+prediction_svr = svr.predict(test)
+
+
+
+# Gaussian Naive Bayes
+gnb = GaussianNB()
+prediction_gnb = gnb.fit(X, y).predict(test)
+
+aux2 = pd.DataFrame(prediction_lr, columns=[0, 1])
+test['Prob Fallo (LR)'] = aux2[1].values
+test['Prob Fallo (SVR)'] = prediction_svr
+test['Prob Fallo (GNB)'] = prediction_gnb
+test['etiqueta'] = x_test[x_test['etiqueta'] != -1]['etiqueta']
+test['fechas'] = fechas[0][x_test.index]
+x_train['fechas'] = fechas[0][x_train.index]
+
 print(prediction)
 # u2 = pd.DataFrame(fechas.values, columns=['fechas'])
 # u2['valvula']= reduced_data['valvula']

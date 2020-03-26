@@ -4,6 +4,7 @@ import datetime
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
+from os import path
 
 matplotlib.use('Agg')
 
@@ -59,7 +60,12 @@ def grafica(eje_x, eje_y, eje_z):
     fig.colorbar(p3, ax=ax3)
 
     # plt.show()
-    fig.savefig('/home/arielmardones/Documentos/val6.png')
+    ruta_windows = 'C:/Users/ariel/OneDrive/Documentos/HStech/SensoVal/Datos pre-cierre/'
+    if path.exists(ruta_windows):
+        fig.savefig(ruta_windows + 'val6.png')
+    else:
+        fig.savefig('/home/arielmardones/Documentos/val6.png')
+
     return
 
 

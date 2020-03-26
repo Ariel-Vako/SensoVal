@@ -1,9 +1,53 @@
-from influxdb import InfluxDBClient
-import matplotlib.pyplot as plt
-import numpy as np
+from datetime import timedelta, datetime
 import pandas as pd
+import urllib3
+import numpy as np
+import matplotlib.pyplot as plt
 
 
+def query_mysql(fecha_fin, minutos_antes, válvula):
+    horizonte_temporal = datetime.strptime('2018-07-19T23:00:00', '%Y-%m-%dT%H:%M:%S')
+    flag = False
+    cont = 0
+
+    fecha_inicio = fecha_fin - timedelta(minutes=minutos_antes)
+
+    http = urllib3.PoolManager()
+    if minutos_antes > 0:
+        url = "http://innotech.selfip.com:8282/consulta_ssvv.php?ini='{}'&fin='{}'&id={}".format(fecha_inicio, fecha_fin, válvula)
+    else:
+        url = "http://innotech.selfip.com:8282/consulta_ssvv.php?ini='{}'&fin='{}'&id={}".format(fecha_fin, fecha_inicio, válvula)
+    r = http.request('GET', url)
+    resultado = list(str(r.data).split("<br>"))[:-2]
+
+    for i in np.arange(len(resultado), 0, -1):
+        if 'r' in resultado[i - 1]:
+            del (resultado[i - 1])
+
+    lista = [None] * len(resultado)
+
+    for i, row in enumerate(resultado):
+        u = row.split(',')
+        lista[i] = u[1:]
+
+    df = pd.DataFrame(lista, columns=['x', 'y', 'z'])
+    df['x'] = pd.to_numeric(df.x)
+    df['y'] = pd.to_numeric(df.y)
+    df['z'] = pd.to_numeric(df.z)
+
+    return df
+
+
+def grafica(df_plot):
+    plt.close('all')
+    ax = plt.gca()
+
+    df_plot.plot(kind='line', y='x', ax=ax)
+    df_plot.plot(kind='line', y='y', color='red', ax=ax)
+    df_plot.plot(kind='line', y='z', color='green', ax=ax)
+
+    plt.grid(True, color='grey', alpha=0.3)
+    plt.show()
 
 
 # index: 14 - BUENO
@@ -100,21 +144,82 @@ import pandas as pd
 # fecha_fin     = '2019-01-24 22:29:29'
 
 
+# --- TEST --- #
+# index: 4 - BUENO
+# fecha_inicio  = '2018-09-20 12:59:30'
+# fecha_fin     =
+
+# index: 19 - Feas vibraciones (válvula cerrada)
+# fecha_inicio = '2018-11-21 19:00:43'
+# fecha_fin = '2018-11-22 19:40:43'
 
 
-cliente = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
-consulta = "SELECT angulo_sensor as angulos FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio, fecha_fin)
-resultado = cliente.query(consulta)
-cliente.close()
+# index: 31 - MALO
+# fecha_inicio  = '2019-01-17 07:40:58'
+# fecha_fin     =
 
-df = pd.DataFrame(list(resultado.get_points()))
-df['indice'] = np.arange(len(df))
+# index: 36
+# fecha_inicio  = '2019-02-26 21:50:26'
+# fecha_fin     =
 
-df.plot(x ='indice', y='angulos', kind = 'scatter', alpha=0.3, s=10)
-plt.grid(which='both', axis='both', color='silver', linestyle='--', linewidth=0.5)
-plt.show()
+# index: 44
+# fecha_inicio  = '2019-03-14 15:32:55'
+# fecha_fin     =
 
-# u2 = pd.DataFrame(fechas.values, columns=['fechas'])
-# u2['valvula']= reduced_data['valvula']
-# u2['etiqueta']= reduced_data['etiqueta']
-# x_train['transduction']= ls.transduction_
+# index: 53
+# fecha_inicio  = '2019-04-19 17:43:36'
+# fecha_fin     =
+
+# index: 67
+# fecha_inicio  = '2018-10-31 08:08:56'
+# fecha_fin     =
+
+# index: 73
+# fecha_inicio  = '2018-12-19 13:12:26'
+# fecha_fin     =
+
+# index: 77
+# fecha_inicio  = '2019-01-11 21:36:22'
+# fecha_fin     =
+
+# index: 94
+# fecha_inicio  = '2019-05-26 04:48:26'
+# fecha_fin     =
+
+# index: 104
+# fecha_inicio  = '2018-10-18 04:16:16'
+# fecha_fin     =
+
+# index: 116
+# fecha_inicio  = '2019-02-18 05:50:37'
+# fecha_fin     =
+
+# index: 117
+# fecha_inicio  = '2019-03-05 21:50:51'
+# fecha_fin     =
+
+
+válvula = 8
+# fecha_inicio  = '2018-08-31 06:03:50'
+# fecha_fin     = '2018-08-31 07:12:09'
+
+# Revisión en las aceleraciones
+fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d %H:%M:%S')
+fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d %H:%M:%S')
+minutos_antes = fecha_fin - fecha_inicio
+print(minutos_antes.total_seconds()/60)
+df = query_mysql(fecha_fin, minutos_antes.total_seconds() / 60, válvula)
+print(df.shape)
+grafica(df)
+print(fecha_inicio)
+# cliente = InfluxDBClient(host='192.168.0.178', port=8086, username='', password='', database='SVALVIA_MCL')
+# consulta = "SELECT angulo_sensor as angulos FROM angulos_svia WHERE id_sensor = '6' AND time  >= '{}' AND time<= '{}'".format(fecha_inicio, fecha_fin)
+# resultado = cliente.query(consulta)
+# cliente.close()
+#
+# df = pd.DataFrame(list(resultado.get_points()))
+# df['indice'] = np.arange(len(df))
+#
+# df.plot(x ='indice', y='angulos', kind = 'scatter', alpha=0.3, s=10)
+# plt.grid(which='both', axis='both', color='silver', linestyle='--', linewidth=0.5)
+# plt.show()
