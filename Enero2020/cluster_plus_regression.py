@@ -14,6 +14,7 @@ from sklearn import svm
 from sklearn.naive_bayes import GaussianNB
 import pomegranate as pg
 from sklearn.metrics import classification_report, accuracy_score
+from sklearn.neural_network import MLPClassifier
 
 
 import warnings
@@ -138,35 +139,35 @@ reduced_data.loc[29, 'etiqueta'] = 0
 reduced_data.loc[30, 'etiqueta'] = 0
 reduced_data.loc[31, 'etiqueta'] = 0
 
-# TODO: Quitar párrafo después de comprobar el cross validation
-xx = reduced_data[reduced_data['etiqueta']!=-1].loc[:, reduced_data.columns[0]:reduced_data.columns[-3]]
-yy = reduced_data[reduced_data['etiqueta']!=-1]['etiqueta']
-
-mrl = LogisticRegression()
-mrl_scores = cross_val_score(mrl, xx, yy, cv=10).mean()
-
-rgn = svm.SVC()
-rgn_scores = cross_val_score(rgn, xx, yy, cv=10).mean()
-
-gnb = GaussianNB()
-gnb_scores = cross_val_score(gnb, xx, yy, cv=10).mean()
-
-print()
-
-
+# #
+# xx = reduced_data[reduced_data['etiqueta']!=-1].loc[:, reduced_data.columns[0]:reduced_data.columns[-3]]
+# yy = reduced_data[reduced_data['etiqueta']!=-1]['etiqueta']
+#
+# mrl = LogisticRegression()
+# mrl_scores = cross_val_score(mrl, xx, yy, cv=10).mean()
+#
+# rgn = svm.SVC()
+# rgn_scores = cross_val_score(rgn, xx, yy, cv=10).mean()
+#
+# gnb = GaussianNB()
+# gnb_scores = cross_val_score(gnb, xx, yy, cv=10).mean()
+#
+# print()
 
 
 
-x_train, x_test = train_test_split(reduced_data, test_size=0.1, random_state=3)
+
+
+x_train, x_test = train_test_split(reduced_data, test_size=0.1, random_state=4)
 # aux_train = x_train[x_train['valvula'] == 0]
 x_train.sort_index(inplace=True)
 x_test.sort_index(inplace=True)
 
 # Rename variables
-X = x_train[x_train['etiqueta'] != -1].loc[:, x_train.columns[0]:x_train.columns[-3]]
+X = x_train[x_train['etiqueta'] != -1].iloc[:, 0:-3]
 # y = x_train[x_train['etiqueta'] != -1]['Spreading']
 y = x_train[x_train['etiqueta'] != -1]['etiqueta']
-test = x_test[x_test['etiqueta'] != -1].loc[:, x_train.columns[0]:x_train.columns[-3]]
+test = x_test[x_test['etiqueta'] != -1].iloc[:, 0:-3]
 
 # Modelos semi-supervisado para las etiquetas
 # ls_model = LabelSpreading(kernel='knn', max_iter=80, alpha=0.1, n_neighbors=12)
@@ -181,14 +182,20 @@ test = x_test[x_test['etiqueta'] != -1].loc[:, x_train.columns[0]:x_train.column
 # lp_model = LabelPropagation(kernel='knn', max_iter=40)
 # lp = lp_model.fit(x_train.loc[:, x_train.columns[0]:x_train.columns[-2]], x_train['etiqueta'])
 
+# NN
+nn=MLPClassifier(solver='lbfgs', alpha=0.1, random_state=30,
+              hidden_layer_sizes=[100, 100])
+nn.fit(X, y)
+prediction_nn = pd.DataFrame(nn.predict_proba(test))
+score = nn.score(test, x_test[x_test['etiqueta'] != -1]['etiqueta'])
+print(score)
 
 # Logistic Regression
 mrl = LogisticRegressionCV(cv=10, random_state=0, class_weight="auto").fit(X, y)
 prediction_lr = mrl.predict_proba(test)
 print(mrl.score(X,y))
 # Support Vector Regression
-svr = svm.SVR(class_weight='balanced', # penalize
-              probability=True)
+svr = svm.SVR(epsilon=0.2)
 svr.fit(X, y)
 prediction_svr = svr.predict(test)
 
@@ -202,9 +209,11 @@ aux2 = pd.DataFrame(prediction_lr, columns=[0, 1])
 test['Prob Fallo (LR)'] = aux2[1].values
 test['Prob Fallo (SVR)'] = prediction_svr
 test['Prob Fallo (GNB)'] = prediction_gnb
+test['Prob Fallo (NN)'] = prediction_nn[1].values
 test['etiqueta'] = x_test[x_test['etiqueta'] != -1]['etiqueta']
 test['fechas'] = fechas[0][x_test.index]
 x_train['fechas'] = fechas[0][x_train.index]
+zu= test.iloc[:, -6:-1]
 
 print(prediction)
 # u2 = pd.DataFrame(fechas.values, columns=['fechas'])
