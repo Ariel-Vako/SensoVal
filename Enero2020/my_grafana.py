@@ -115,8 +115,8 @@ def grafica(df_plot):
 # fecha_fin     = '2019-01-01 12:52:59'
 
 # index: 26 -
-# fecha_inicio  = '2019-01-02 01:19:21'
-# fecha_fin     = '2019-01-02 01:49:21'
+fecha_inicio  = '2019-01-02 01:19:21'
+fecha_fin     = '2019-01-02 01:49:21'
 
 
 # index: 28 - MALO

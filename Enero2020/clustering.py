@@ -187,3 +187,17 @@ def unidimensional_metrics(signal, labels):
         return [ss, ch, db]
     else:
         return [np.nan, np.nan, np.nan]
+
+def my_r2(y_true, y_pred):
+    numerador = 0
+    for i, j in zip(y_true, y_pred):
+        numerador += (i-j)**2
+
+    denominador =0
+    for z in y_true:
+        denominador += (z - np.mean(y_true))**2
+
+    if denominador==0:
+        return 0
+    else:
+        return 1- numerador/denominador
