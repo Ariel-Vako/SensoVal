@@ -248,7 +248,7 @@ print(f'R2 : {svr_final.score(X, y)}')
 
 svr_pickle = ruta + 'saveVar.txt'
 with open(svr_pickle, 'wb') as f:
-    pickle.dump([X, y, svr_final, reduced_data], f)
+    pickle.dump([X, y, svr_final, reduced_data, fechas], f)
 
 # prediction_svr_final = svr.predict(test)
 # fpr_svr, tpr_svr, thresholds_svr = roc_curve(y_test, prediction_svr)
