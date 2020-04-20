@@ -102,4 +102,6 @@ prediction_final = svr_final.predict(xx[col_names])
 resumen = pd.DataFrame(prediction_final, columns=['SVR'])
 resumen['indice'] = xx.index.values
 resumen['fechas'] = fechas[0][xx.index.values].values
-resumen.set_index(columns='indice', inplace=True)
+resumen.set_index('indice', inplace=True)
+
+print('')
