@@ -47,6 +47,9 @@ svr_final = svm.SVR(epsilon=0.2)
 svr_final.fit(X2, y)
 print(f'R2 con {len(col_names)} variables: {svr_final.score(X2, y):.3f}')
 
+svr_final_pickle = ruta + 'mfinal.txt'
+with open(svr_final_pickle, 'wb')as ff:
+    pickle.dump(svr_final, ff)
 # Calculo de la nueva zona Hazard
 # scores = []
 # hazard_zone = []

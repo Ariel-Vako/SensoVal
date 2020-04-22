@@ -115,8 +115,8 @@ def grafica(df_plot):
 # fecha_fin     = '2019-01-01 12:52:59'
 
 # index: 26 -
-fecha_inicio  = '2019-01-02 01:19:21'
-fecha_fin     = '2019-01-02 01:49:21'
+# fecha_inicio  = '2019-01-02 01:19:21'
+# fecha_fin     = '2019-01-02 01:49:21'
 
 
 # index: 28 - MALO
@@ -140,8 +140,37 @@ fecha_fin     = '2019-01-02 01:49:21'
 # fecha_fin     = '2019-01-25 09:18:52'
 
 # index: 33 - MALO
-# fecha_inicio  = '2019-01-24 22:29:29'
-# fecha_fin     = '2019-01-24 22:29:29'
+# fecha_inicio  = '2019-01-24 09:19:33'
+# fecha_fin     = '2019-01-24 22:35:03'
+
+# index: 51
+# fecha_inicio  = '2019-04-08 04:51:36'
+# fecha_fin     = '2019-04-08 05:57:31'
+
+# index: 55
+fecha_inicio  = '2019-04-28 13:47:13'
+fecha_fin     = '2019-04-29 05:46:44'
+
+# # index: 68
+# fecha_inicio  = '2018-10-31 22:52:56'
+# fecha_fin     = '2018-11-01 08:34:44'
+
+# index: 71
+# fecha_inicio  = '2018-12-17 11:50:17'
+# fecha_fin     = '2018-12-17 11:51:38'
+
+# # index: 75
+# fecha_inicio  = '2019-01-02 02:00:56'
+# fecha_fin     = '2019-01-02 05:21:45'
+
+# index: 90
+# fecha_inicio  = '2019-04-20 20:37:28'
+# fecha_fin     = '2019-04-21 20:12:35'
+
+
+# index: 115
+fecha_inicio  = '2019-01-08 12:54:34'
+fecha_fin     = '2019-01-08 15:35:40'
 
 
 # --- TEST --- #
@@ -199,7 +228,7 @@ fecha_fin     = '2019-01-02 01:49:21'
 # fecha_fin     =
 
 
-válvula = 8
+válvula = 6
 # fecha_inicio  = '2018-08-31 06:03:50'
 # fecha_fin     = '2018-08-31 07:12:09'
 
