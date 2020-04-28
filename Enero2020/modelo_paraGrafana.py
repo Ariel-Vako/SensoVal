@@ -100,4 +100,4 @@ if __name__ == '__main__':
     x = generador_variables(features)
 
     prob = svr_final.predict(x)
-    print(f'Probabilidad de fallo: {100-prob[0]*100:.1f}')
+    print(f'Probabilidad de fallo: {100-prob[0]*100:.1f}%')

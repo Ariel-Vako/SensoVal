@@ -98,7 +98,7 @@ with open(svr_final_pickle, 'wb')as ff:
 # plt.savefig(ruta + 'plot.png')
 
 # Pronostico sobre datos sin etiquetas
-xx = reduced_data[reduced_data['etiqueta'] == -1].iloc[:, 0:-3]
+xx = reduced_data[reduced_data['etiqueta'] == -1]
 yy = reduced_data[reduced_data['etiqueta'] == -1]['etiqueta']
 prediction_final = svr_final.predict(xx[col_names])
 

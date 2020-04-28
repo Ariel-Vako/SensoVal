@@ -6,10 +6,6 @@ import matplotlib.pyplot as plt
 
 
 def query_mysql(fecha_fin, minutos_antes, válvula):
-    horizonte_temporal = datetime.strptime('2018-07-19T23:00:00', '%Y-%m-%dT%H:%M:%S')
-    flag = False
-    cont = 0
-
     fecha_inicio = fecha_fin - timedelta(minutes=minutos_antes)
 
     http = urllib3.PoolManager()
@@ -136,8 +132,8 @@ def grafica(df_plot):
 # fecha_fin     = '2019-01-03 21:12:44'
 
 # index: 32 - MALO
-# fecha_inicio  = '2019-01-24 09:18:52'
-# fecha_fin     = '2019-01-25 09:18:52'
+# fecha_inicio  = '2019-01-24 08:55:10'
+# fecha_fin     = '2019-01-24 22:53:08'
 
 # index: 33 - MALO
 # fecha_inicio  = '2019-01-24 09:19:33'
@@ -148,8 +144,8 @@ def grafica(df_plot):
 # fecha_fin     = '2019-04-08 05:57:31'
 
 # index: 55
-fecha_inicio  = '2019-04-28 13:47:13'
-fecha_fin     = '2019-04-29 05:46:44'
+# fecha_inicio  = '2019-04-28 13:47:13'
+# fecha_fin     = '2019-04-29 05:46:44'
 
 # # index: 68
 # fecha_inicio  = '2018-10-31 22:52:56'
@@ -169,8 +165,8 @@ fecha_fin     = '2019-04-29 05:46:44'
 
 
 # index: 115
-fecha_inicio  = '2019-01-08 12:54:34'
-fecha_fin     = '2019-01-08 15:35:40'
+# fecha_inicio  = '2019-01-08 12:54:34'
+# fecha_fin     = '2019-01-08 15:35:40'
 
 
 # --- TEST --- #
